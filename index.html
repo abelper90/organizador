@@ -228,7 +228,7 @@ a.btn{display:flex;align-items:center;justify-content:center;text-decoration:non
 <script>
 (function(){
 'use strict';
-var VERSION='7';
+var VERSION='8';
 var KEY='organizador.v1', RKEY='organizador.rem.v1', META='organizador.meta', CFG='organizador.cfg';
 var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 var DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
@@ -246,6 +246,16 @@ function read(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==nul
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 
 var events=read(KEY,[]);
+// Recupera asignatura/código/profesor de clases importadas con versiones anteriores
+(function(){
+  var ch=false;
+  events.forEach(function(e){
+    if(e.src!=='ics'||e.subject) return;
+    var n=e.notes||'', c=(n.match(/\((\d{4,6})\)/)||[])[1]; if(!c) return;
+    e.subject=e.title; e.code=c; e.teacher=((n.match(/Docente\s*:\s*([^·]+)/)||[])[1]||'').trim(); e.kind='clase'; ch=true;
+  });
+  if(ch) write(KEY,events);
+})();
 var reminders=read(RKEY,[]);
 var SKEY='organizador.subj.v1';
 var subjMeta=read(SKEY,{});

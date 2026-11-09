@@ -1,6 +1,6 @@
 // Service worker: deja la app disponible sin conexión.
 // Con internet siempre intenta traer la versión más nueva; sin internet usa la guardada.
-var CACHE = 'organizador-v7';
+var CACHE = 'organizador-v8';
 var FILES = ['./', 'index.html', 'manifest.json', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', function (e) {
