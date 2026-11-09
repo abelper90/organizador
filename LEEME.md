@@ -8,7 +8,10 @@ Menú ☰ arriba a la izquierda:
 - **Inicio:** calendario de 2 semanas, cuadro **Hoy**, cuadro **Importante** y **Recordatorios** (con casilla para añadir uno al momento).
 - **Calendario:** el mes completo. Pulsas un día para ver, añadir, editar o borrar.
 - **Recordatorios:** pendientes y hechos.
+- **Estudios:** tus asignaturas (salen solas al importar el horario de la UPV, con código, profesores y próxima clase), botón a PoliformaT, y exámenes/entregas con cuenta atrás que también salen en el calendario, en Hoy y en Importante. En cada asignatura puedes pegar el enlace de su página de PoliformaT y apuntar notas.
 - **Ajustes y copias:** copias, Calendario del iPhone y preferencias.
+
+No hay conexión automática con PoliformaT ni con la app del Alumno: haría falta tu contraseña y las webs de la UPV no permiten que otra web lea sus datos. Los exámenes y entregas se apuntan a mano.
 
 El botón **+** abre «Apunte rápido» (recordatorio o evento). Al abrir la app sale directamente ese formulario (se puede quitar en Ajustes).
 

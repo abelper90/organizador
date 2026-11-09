@@ -85,7 +85,7 @@ h2{font-size:14px;margin:0;color:var(--muted);font-weight:600;text-transform:upp
 .sheet h3{margin:0 0 4px;font-size:20px;text-transform:capitalize}
 .sheet .sub{color:var(--muted);font-size:14px;margin-bottom:10px}
 label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
-input[type=text],input[type=date],input[type=time],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);
+input[type=text],input[type=url],input[type=date],input[type=time],select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);
   background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
 textarea{min-height:80px;resize:vertical}
 .row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
@@ -108,6 +108,8 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-wi
 .snap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .snap:first-child{border-top:0}
 .snap .btn{flex:none;width:auto;height:38px;padding:0 14px;font-size:14px}
+a.btn{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.chev{color:var(--muted);font-size:22px;align-self:center}
 /* menú lateral */
 .drawer{position:fixed;top:0;bottom:0;left:0;width:min(82vw,320px);background:var(--card);z-index:21;
   transform:translateX(-105%);transition:transform .22s ease;padding:calc(env(safe-area-inset-top) + 18px) 14px 24px;
@@ -193,6 +195,16 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-wi
     </div>
   </section>
 
+  <!-- ESTUDIOS -->
+  <section class="view" id="v-study">
+    <div class="card"><div class="btns" style="margin-top:0">
+      <a class="btn" href="https://poliformat.upv.es" target="_blank" rel="noopener">PoliformaT</a>
+      <button class="btn primary" data-act="studypick">+ Examen / entrega</button>
+    </div></div>
+    <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Próximos exámenes y entregas</h2></div><div id="studyUp"></div></div>
+    <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Asignaturas</h2></div><div id="studySubj"></div></div>
+  </section>
+
   <!-- AJUSTES -->
   <section class="view" id="v-set">
     <div class="card" id="setBody"></div>
@@ -208,6 +220,7 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-wi
   <button data-go="home"><span class="ic">⌂</span>Inicio</button>
   <button data-go="cal"><span class="ic">▦</span>Calendario</button>
   <button data-go="rem"><span class="ic">☑</span>Recordatorios</button>
+  <button data-go="study"><span class="ic">✎</span>Estudios</button>
   <button data-go="set"><span class="ic">⚙</span>Ajustes y copias</button>
   <div class="hint">Aquí iremos añadiendo más pestañas.</div>
 </nav>
@@ -215,11 +228,11 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-wi
 <script>
 (function(){
 'use strict';
-var VERSION='6';
+var VERSION='7';
 var KEY='organizador.v1', RKEY='organizador.rem.v1', META='organizador.meta', CFG='organizador.cfg';
 var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 var DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-var TITLES={home:'Inicio',cal:'Calendario',rem:'Recordatorios',set:'Ajustes y copias'};
+var TITLES={home:'Inicio',cal:'Calendario',rem:'Recordatorios',study:'Estudios',set:'Ajustes y copias'};
 
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -234,6 +247,8 @@ function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}ca
 
 var events=read(KEY,[]);
 var reminders=read(RKEY,[]);
+var SKEY='organizador.subj.v1';
+var subjMeta=read(SKEY,{});
 var meta=read(META,{lastBackup:null,created:ymd(new Date())});
 var cfg=read(CFG,{quick:true});
 var today=ymd(new Date());
@@ -246,7 +261,7 @@ if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().cat
 
 /* ---------- Guardado + copias automáticas ---------- */
 function save(){
-  var ok=write(KEY,events)&write(RKEY,reminders);
+  var ok=write(KEY,events)&write(RKEY,reminders)&write(SKEY,subjMeta);
   if(!ok) alert('No se pudo guardar. Haz una copia de seguridad ya.');
   scheduleSnap(); render();
 }
@@ -264,7 +279,7 @@ function idbPut(o){return idb().then(function(db){return new Promise(function(re
   var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).put(o); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
 function idbDel(ts){return idb().then(function(db){return new Promise(function(res,rej){
   var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).delete(ts); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
-function stateStr(){return JSON.stringify({e:events,r:reminders})}
+function stateStr(){return JSON.stringify({e:events,r:reminders,s:subjMeta})}
 function snap(kind){
   if(!events.length&&!reminders.length) return Promise.resolve();
   var s=stateStr(); if(kind==='change'&&s===lastSnap) return Promise.resolve();
@@ -293,7 +308,7 @@ function restoreSnap(ts){
     var r=all.filter(function(x){return x.ts===ts})[0]; if(!r) return;
     if(!confirm('¿Restaurar esta copia ('+r.ne+' eventos, '+r.nr+' recordatorios)? Se guarda antes una copia de lo actual.')) return;
     snap('pre').then(function(){
-      var d=JSON.parse(r.data); events=d.e||[]; reminders=d.r||[]; save();
+      var d=JSON.parse(r.data); events=d.e||[]; reminders=d.r||[]; if(d.s) subjMeta=d.s; save();
     });
   }).catch(function(){});
 }
@@ -313,6 +328,7 @@ function pendingRem(){
 function itemHtml(it,k,showDate){
   var m=[], late=(k==='r'&&it.date&&it.date<today&&!it.done);
   if(showDate&&it.date){var d=parse(it.date); m.push(DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3))}
+  if(k==='e'&&(it.kind==='examen'||it.kind==='entrega')&&!it.done&&it.date>=today) m.unshift(countdown(it.date));
   if(it.time) m.push(it.time);
   var meta2=m.length?'<div class="m d">'+(late?'Vencido · ':'')+esc(m.join(' · '))+'</div>':(late?'<div class="m d">Vencido</div>':'');
   var note=it.notes?'<div class="m">'+esc(it.notes.slice(0,80))+'</div>':'';
@@ -406,6 +422,67 @@ function renderSet(){
   }).catch(function(){ if($('snapList')) $('snapList').textContent='Las copias automáticas no están disponibles en este navegador.' });
 }
 
+/* ---------- Estudios ---------- */
+function countdown(date){var n=Math.round((parse(date)-parse(today))/864e5); return n<=0?'hoy':n===1?'mañana':'en '+n+' días'}
+function nowHM(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+function isTask(e){return e.kind==='examen'||e.kind==='entrega'}
+function subjects(){
+  var m={}, nh=nowHM();
+  events.forEach(function(e){
+    if(e.src!=='ics'||!e.subject) return;
+    var k=e.code||e.subject, s=m[k]; if(!s) s=m[k]={key:k,name:e.subject,code:e.code||'',teachers:{},next:null};
+    if(e.teacher) s.teachers[e.teacher]=1;
+    if((e.date>today||(e.date===today&&(e.time||'')>=nh))&&(!s.next||cmp(e,s.next)<0)) s.next=e;
+  });
+  return Object.keys(m).map(function(k){var s=m[k]; s.teachersTxt=Object.keys(s.teachers).slice(0,3).join(' · '); return s})
+    .sort(function(a,b){return a.name.localeCompare(b.name,'es')});
+}
+function nextTxt(e){
+  var d=parse(e.date), loc=(e.notes||'').split(' · ')[0];
+  return DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3)+(e.time?' '+e.time:'')+(loc?' · '+loc:'');
+}
+function renderStudy(){
+  var subs=subjects();
+  var up=events.filter(function(e){return isTask(e)&&!e.done&&e.date>=today}).sort(cmp);
+  $('studyUp').innerHTML=up.length?up.map(function(e){return itemHtml(e,'e',true)}).join(''):'<div class="empty">Sin exámenes ni entregas próximos. Añádelos con el botón de arriba.</div>';
+  $('studySubj').innerHTML=subs.length?subs.map(function(s){
+    return '<div class="item" data-subj="'+esc(s.key)+'"><span class="bar"></span><div style="flex:1;min-width:0"><div class="t">'+esc(s.name)+'</div>'+
+      '<div class="m">'+(s.code?esc(s.code)+(s.teachersTxt?' · ':''):'')+esc(s.teachersTxt)+'</div>'+
+      (s.next?'<div class="m">Próxima clase: '+esc(nextTxt(s.next))+'</div>':'')+'</div><span class="chev">›</span></div>';
+  }).join(''):'<div class="empty">Importa tu horario de la UPV y aparecerán aquí tus asignaturas.</div><button class="link" data-go="set">Ir a Ajustes</button>';
+}
+function subjSheet(key){
+  var s=subjects().filter(function(x){return x.key===key})[0]; if(!s) return;
+  var meta=subjMeta[key]||{}, nh=nowHM();
+  var cls=events.filter(function(e){return e.src==='ics'&&(e.code||e.subject)===key&&(e.date>today||(e.date===today&&(e.time||'')>=nh))}).sort(cmp).slice(0,3);
+  var tasks=events.filter(function(e){return isTask(e)&&!e.done&&(e.code||e.subject)===key}).sort(cmp);
+  var url=meta.url||'https://poliformat.upv.es';
+  openSheet('<h3 style="text-transform:none">'+esc(s.name)+'</h3>'+
+    '<div class="sub">'+(s.code?esc(s.code)+(s.teachersTxt?' · ':''):'')+esc(s.teachersTxt)+'</div>'+
+    '<a class="btn primary" style="flex:none;width:100%" href="'+esc(url)+'" target="_blank" rel="noopener">'+(meta.url?'Abrir en PoliformaT':'Abrir PoliformaT')+'</a>'+
+    '<label for="su">Enlace de esta asignatura en PoliformaT</label><input type="url" id="su" value="'+esc(meta.url||'')+'" placeholder="Pega aquí el enlace (https://…)">'+
+    '<label for="sn">Notas de la asignatura</label><textarea id="sn">'+esc(meta.notes||'')+'</textarea>'+
+    '<h2 style="margin:18px 0 4px">Exámenes y entregas</h2>'+(tasks.length?tasks.map(function(e){return itemHtml(e,'e',true)}).join(''):'<div class="empty">Ninguno apuntado.</div>')+
+    '<div class="btns" style="margin-top:10px"><button class="btn" data-act="study" data-kind="entrega" data-key="'+esc(key)+'">+ Entrega</button><button class="btn" data-act="study" data-kind="examen" data-key="'+esc(key)+'">+ Examen</button></div>'+
+    '<h2 style="margin:18px 0 4px">Próximas clases</h2>'+(cls.length?cls.map(function(e){return '<div class="m" style="padding:3px 0">'+esc(nextTxt(e))+'</div>'}).join(''):'<div class="empty">No hay más clases en el horario importado.</div>')+
+    '<div class="btns"><button class="btn" data-act="close">Cerrar</button><button class="btn primary" data-act="subjsave" data-key="'+esc(key)+'">Guardar</button></div>');
+}
+function saveSubj(key){
+  var u=$('su').value.trim();
+  if(u&&!/^https?:\/\//i.test(u)){alert('El enlace tiene que empezar por https://');return}
+  subjMeta[key]={url:u,notes:$('sn').value.trim()}; save(); closeSheet();
+}
+function studyPick(){
+  var subs=subjects();
+  openSheet('<h3>Nuevo examen o entrega</h3>'+
+    (subs.length?'<label for="sp">Asignatura</label><select id="sp">'+subs.map(function(s){return '<option value="'+esc(s.key)+'">'+esc(s.name)+'</option>'}).join('')+'</select>':'<div class="sub">Aún no hay asignaturas importadas; se apuntará sin asignatura.</div>')+
+    '<div class="btns"><button class="btn" data-act="close">Cancelar</button><button class="btn" data-act="study" data-kind="entrega">Entrega</button><button class="btn primary" data-act="study" data-kind="examen">Examen</button></div>');
+}
+function newStudy(kind,key){
+  var s=key?subjects().filter(function(x){return x.key===key})[0]:null;
+  form('e',null,{extra:{kind:kind,subject:s?s.name:'',code:s?s.code:''},preset:{title:(kind==='examen'?'Examen':'Entrega')+(s?' '+s.name:''),important:true}});
+}
+
 function renderBanner(){
   var b=$('banner'); if(current!=='home'||(!events.length&&!reminders.length)){b.classList.remove('show');return}
   var days=meta.lastBackup?Math.floor((parse(today)-parse(meta.lastBackup))/864e5):999;
@@ -414,7 +491,7 @@ function renderBanner(){
 }
 
 function render(){
-  if(current==='home') renderHome(); else if(current==='cal') renderCal(); else if(current==='rem') renderRem(); else renderSet();
+  if(current==='home') renderHome(); else if(current==='cal') renderCal(); else if(current==='rem') renderRem(); else if(current==='study') renderStudy(); else renderSet();
   renderBanner();
 }
 
@@ -423,7 +500,7 @@ function openMenu(){ $('drawer').classList.add('open'); $('scrim').classList.add
 function closeMenu(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open') }
 function go(v){
   current=v; closeMenu(); closeSheet();
-  ['home','cal','rem','set'].forEach(function(n){
+  ['home','cal','rem','study','set'].forEach(function(n){
     $('v-'+n).classList.toggle('on',n===v);
     var b=document.querySelector('#drawer [data-go='+n+']'); if(b) b.classList.toggle('on',n===v);
   });
@@ -448,7 +525,8 @@ function dayView(s){
 function form(kind,item,opts){
   opts=opts||{}; var isNew=!item, type=kind;
   var b=item||{title:'',date:opts.date||(kind==='e'?today:''),time:'',important:false,notes:''};
-  var head=isNew?(opts.quick?'Apunte rápido':'Nuevo'):(kind==='e'?'Editar evento':'Editar recordatorio');
+  if(isNew&&opts.preset) Object.assign(b,opts.preset);
+  var head=isNew?(opts.quick?'Apunte rápido':(opts.extra&&opts.extra.kind?(opts.extra.kind==='examen'?'Nuevo examen':'Nueva entrega'):'Nuevo')):(kind==='e'?'Editar evento':'Editar recordatorio');
   openSheet('<h3>'+head+'</h3>'+
     (isNew?'<div class="seg" id="seg"><button type="button" data-type="r" class="'+(kind==='r'?'on':'')+'">Recordatorio</button><button type="button" data-type="e" class="'+(kind==='e'?'on':'')+'">Evento</button></div>':'')+
     '<form id="f" autocomplete="off">'+
@@ -472,7 +550,7 @@ function form(kind,item,opts){
     var date=$('fd').value; if(type==='e'&&!date) date=today;
     var vals={title:title,date:date||'',time:date?$('fh').value:'',important:$('fi').checked,notes:$('fn').value.trim()};
     if(isNew){
-      if(type==='e') events.push(Object.assign({id:uid(),done:false},vals));
+      if(type==='e') events.push(Object.assign({id:uid(),done:false},vals,opts.extra||{}));
       else reminders.push(Object.assign({id:uid(),done:false,created:Date.now()},vals));
     }else{
       var list=kind==='e'?events:reminders;
@@ -487,7 +565,7 @@ function quickForm(){ form('r',null,{quick:true}) }
 
 /* ---------- Copia en archivo ---------- */
 function exportData(){
-  var blob=new Blob([JSON.stringify({app:'organizador',version:2,exported:new Date().toISOString(),events:events,reminders:reminders},null,2)],{type:'application/json'});
+  var blob=new Blob([JSON.stringify({app:'organizador',version:2,exported:new Date().toISOString(),events:events,reminders:reminders,subjects:subjMeta},null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='organizador-copia-'+today+'.json';
   document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
   meta.lastBackup=today; write(META,meta); render();
@@ -499,7 +577,8 @@ function importData(file){
       var j=JSON.parse(r.result); if(!j||!Array.isArray(j.events)) throw 0;
       var ids={}, rids={}; events.forEach(function(e){ids[e.id]=1}); reminders.forEach(function(e){rids[e.id]=1});
       var added=0;
-      j.events.forEach(function(e){ if(e&&e.id&&e.title&&e.date&&!ids[e.id]){events.push({id:String(e.id),title:String(e.title),date:String(e.date),time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,src:e.src});added++} });
+      j.events.forEach(function(e){ if(e&&e.id&&e.title&&e.date&&!ids[e.id]){events.push({id:String(e.id),title:String(e.title),date:String(e.date),time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,src:e.src,subject:e.subject,code:e.code,teacher:e.teacher,kind:e.kind});added++} });
+      if(j.subjects) Object.keys(j.subjects).forEach(function(k){ if(!subjMeta[k]) subjMeta[k]=j.subjects[k] });
       (j.reminders||[]).forEach(function(e){ if(e&&e.id&&e.title&&!rids[e.id]){reminders.push({id:String(e.id),title:String(e.title),date:e.date||'',time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,created:e.created||Date.now(),doneAt:e.doneAt});added++} });
       save(); alert('Importados '+added+' elementos nuevos.');
     }catch(x){alert('El archivo no es una copia válida.')}
@@ -603,9 +682,11 @@ function importICS(file){
         expand(e,from,to).forEach(function(o){
           if(!e.recid&&over[key+'|'+o.date]) return;
           var id='ics-'+key+'-'+o.date, notes=[e.loc,e.desc].filter(Boolean).join(' · ').slice(0,300);
+          var code=((e.desc||'').match(/\((\d{4,6})\)/)||[])[1]||'', teacher=(((e.desc||'').match(/Docente\s*:\s*([^·]+)/)||[])[1]||'').trim();
+          var extra=code?{subject:e.title,code:code,teacher:teacher,kind:'clase'}:{};
           var ex=events.filter(function(x){return x.id===id})[0];
-          if(ex){ex.title=e.title;ex.time=o.time;ex.notes=notes;updated++}
-          else{events.push({id:id,title:e.title,date:o.date,time:o.time,important:false,notes:notes,done:false,src:'ics'});added++}
+          if(ex){ex.title=e.title;ex.time=o.time;ex.notes=notes;Object.assign(ex,extra);updated++}
+          else{events.push(Object.assign({id:id,title:e.title,date:o.date,time:o.time,important:false,notes:notes,done:false,src:'ics'},extra));added++}
         });
       });
       save(); alert('Importados '+added+' eventos nuevos y '+updated+' actualizados (de hace 30 días a 13 meses vista).');
@@ -642,12 +723,16 @@ document.addEventListener('click',function(ev){
     else if(a==='icsall') sendICS(events.filter(function(x){return x.src!=='ics'}),'organizador.ics');
     else if(a==='icsimport') $('icsfile').click();
     else if(a==='icsdel'){ var n=events.filter(function(x){return x.src==='ics'}).length; if(n&&confirm('¿Borrar los '+n+' eventos importados? No toca los que creaste tú.')){events=events.filter(function(x){return x.src!=='ics'});save()} else if(!n) alert('No hay eventos importados.') }
+    else if(a==='studypick') studyPick();
+    else if(a==='study'){ var sel=$('sp'); newStudy(act.getAttribute('data-kind'),act.getAttribute('data-key')||(sel?sel.value:'')) }
+    else if(a==='subjsave') saveSubj(act.getAttribute('data-key'));
     else if(a==='export') exportData();
     else if(a==='import') $('file').click();
     else if(a==='restore') restoreSnap(+act.getAttribute('data-ts'));
     else if(a==='clearDone'){ var n2=reminders.filter(function(r){return r.done}).length; if(n2&&confirm('¿Borrar los '+n2+' recordatorios hechos?')){reminders=reminders.filter(function(r){return !r.done});save()} }
     return;
   }
+  var sj=t.closest('[data-subj]'); if(sj){subjSheet(sj.getAttribute('data-subj'));return}
   var day2=t.closest('.day'); if(day2){dayView(day2.getAttribute('data-d'));return}
   var item=t.closest('.item'); if(item){var k2=item.getAttribute('data-k'), e2=find(k2==='e'?events:reminders,item.getAttribute('data-id')); if(e2) form(k2,e2)}
 });
