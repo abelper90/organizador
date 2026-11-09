@@ -75,7 +75,9 @@ label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
 input[type=text],input[type=date],input[type=time],textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);
   background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px}
 textarea{min-height:80px;resize:vertical}
-.row{display:flex;gap:10px}.row>*{flex:1}
+.row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.row>*{min-width:0}
+input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-width:0;max-width:100%;height:48px;display:block}
 .toggle{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:16px;color:var(--ink)}
 .toggle input{width:22px;height:22px;accent-color:var(--imp)}
 .btns{display:flex;gap:10px;margin-top:18px}
