@@ -18,7 +18,7 @@ Para que iOS la instale hace falta que se sirva por **https** una primera vez. D
 ## Calendario del iPhone (Google / Outlook)
 Una web no puede leer ni escribir directo en el Calendario, así que se pasa en cada sentido por separado.
 - **De la app al Calendario:** abre un evento → «Añadir al Calendario del iPhone» → en el menú de compartir elige Calendario. En Ajustes hay otro botón para pasar todos tus eventos de golpe.
-- **Del Calendario a la app (horario de la uni):** exporta el calendario como `.ics` desde Google Calendar (Ajustes → Importar y exportar → Exportar) u Outlook (Calendario → Compartir → publicar `.ics`), guárdalo en Archivos y en Ajustes pulsa «Importar horario (.ics)». Se importan las clases repetidas semanalmente (13 meses vista). Si lo vuelves a importar se actualiza sin duplicar, y «Borrar eventos importados» limpia solo lo importado.
+- **Del Calendario a la app (horario de la uni):** el servidor de la uni no permite que una web lea el calendario por sí sola, así que se hace con el archivo. En el iPhone abre en **Safari** tu enlace personal de calendario de la uni (guárdalo en Notas; no lo compartas ni lo subas a ningún sitio, es privado). Se descarga un archivo `.ics`: guárdalo en Archivos. Luego en la app: Ajustes → «Importar horario (.ics)» → elige ese archivo. Se importan las clases de hace 30 días a 13 meses vista, con hora, aula y profesor. Si lo vuelves a importar se actualiza sin duplicar, y «Borrar eventos importados» limpia solo lo importado.
 - No es automático: hay que repetir la importación si cambia el horario.
 
 ## Centro de control

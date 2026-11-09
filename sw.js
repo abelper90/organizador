@@ -1,10 +1,17 @@
 // Service worker: deja la app disponible sin conexión.
-// Si cambias archivos de la app, sube el número de versión.
-var CACHE = 'organizador-v4';
+// Con internet siempre intenta traer la versión más nueva; sin internet usa la guardada.
+var CACHE = 'organizador-v5';
 var FILES = ['./', 'index.html', 'manifest.json', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(
+    caches.open(CACHE).then(function (c) {
+      // cache:'reload' evita copiar versiones viejas desde la caché HTTP del navegador
+      return Promise.all(FILES.map(function (f) {
+        return fetch(new Request(f, { cache: 'reload' })).then(function (r) { return c.put(f, r); });
+      }));
+    }).then(function () { return self.skipWaiting(); })
+  );
 });
 self.addEventListener('activate', function (e) {
   e.waitUntil(caches.keys().then(function (keys) {
@@ -13,9 +20,15 @@ self.addEventListener('activate', function (e) {
 });
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  var url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
+  // Red primero (versión nueva); si no hay internet, la guardada
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(function (hit) {
-      return hit || fetch(e.request).catch(function () { return caches.match('index.html'); });
+    fetch(new Request(e.request, { cache: 'no-cache' })).then(function (r) {
+      if (r && r.ok) { var copy = r.clone(); caches.open(CACHE).then(function (c) { c.put(e.request, copy); }); }
+      return r;
+    }).catch(function () {
+      return caches.match(e.request, { ignoreSearch: true }).then(function (hit) { return hit || caches.match('index.html'); });
     })
   );
 });

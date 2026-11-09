@@ -254,7 +254,7 @@ function menu(){
     '<input type="file" id="icsfile" accept=".ics,text/calendar" hidden>'+
     '<input type="file" id="file" accept="application/json,.json" hidden>'+
     '<label class="toggle" style="margin:6px 0 14px"><input type="checkbox" id="cfgQuick"'+(cfg.quick?' checked':'')+'> Al abrir la app, mostrar directamente «Apunte rápido»</label>'+
-    '<div class="small">'+events.length+' eventos guardados. Última copia: '+(meta.lastBackup||'nunca')+'.</div></div>'+
+    '<div class="small">'+events.length+' eventos guardados. Última copia: '+(meta.lastBackup||'nunca')+'.<br>Versión 5</div></div>'+
     '<div class="btns"><button class="btn" data-act="close">Cerrar</button></div>');
   $('file').onchange=function(){ if(this.files[0]) importData(this.files[0]) };
   $('icsfile').onchange=function(){ if(this.files[0]) importICS(this.files[0]) };
@@ -318,7 +318,7 @@ function parseICS(text){
     var i=ln.indexOf(':'); if(i<0) return;
     var name=ln.slice(0,i).split(';')[0].toUpperCase(), val=ln.slice(i+1);
     if(name==='SUMMARY')cur.title=icsUnesc(val);
-    else if(name==='DESCRIPTION')cur.desc=icsUnesc(val);
+    else if(name==='DESCRIPTION')cur.desc=icsUnesc(val).replace(/<br\s*\/?>/gi,' · ').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\s*·\s*(·\s*)+/g,' · ').replace(/\s{2,}/g,' ').trim();
     else if(name==='LOCATION')cur.loc=icsUnesc(val);
     else if(name==='UID')cur.uid=val;
     else if(name==='STATUS')cur.status=val;
@@ -414,7 +414,21 @@ document.addEventListener('visibilitychange',function(){
 render();
 if(cfg.quick || /[?&]rapido=1/.test(location.search) || location.hash==='#rapido'){ form(null,today,true); }
 
-if('serviceWorker' in navigator){ window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})}); }
+if('serviceWorker' in navigator){
+  var reloaded=false, hadSW=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',function(){
+    // Versión nueva activa: recargar una vez, salvo que estés escribiendo algo
+    if(reloaded||!hadSW) return;
+    if($('sheet').classList.contains('open')){ return }
+    reloaded=true; location.reload();
+  });
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      reg.update().catch(function(){});
+      document.addEventListener('visibilitychange',function(){ if(!document.hidden) reg.update().catch(function(){}) });
+    }).catch(function(){});
+  });
+}
 })();
 </script>
 </body>
