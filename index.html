@@ -139,6 +139,8 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function read(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 
+var CFG='organizador.cfg';
+var cfg=read(CFG,{quick:true});
 var events=read(KEY,[]);
 var meta=read(META,{lastBackup:null,created:ymd(new Date())});
 function save(){ if(!write(KEY,events)) alert('No se pudo guardar. Haz una copia de seguridad ya.'); render(); }
@@ -245,9 +247,11 @@ function menu(){
     '<div class="menu"><button class="btn primary" data-act="export">Guardar copia de seguridad</button>'+
     '<button class="btn" data-act="import">Restaurar desde copia</button>'+
     '<input type="file" id="file" accept="application/json,.json" hidden>'+
+    '<label class="toggle" style="margin:6px 0 14px"><input type="checkbox" id="cfgQuick"'+(cfg.quick?' checked':'')+'> Al abrir la app, mostrar directamente «Apunte rápido»</label>'+
     '<div class="small">'+events.length+' eventos guardados. Última copia: '+(meta.lastBackup||'nunca')+'.</div></div>'+
     '<div class="btns"><button class="btn" data-act="close">Cerrar</button></div>');
   $('file').onchange=function(){ if(this.files[0]) importData(this.files[0]) };
+  $('cfgQuick').onchange=function(){ cfg.quick=this.checked; write(CFG,cfg); };
 }
 function renderBanner(){
   var b=$('banner'); if(!events.length){b.classList.remove('show');return}
@@ -281,10 +285,16 @@ $('prev').onclick=function(){view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=function(){view.setMonth(view.getMonth()+1);render()};
 $('goToday').onclick=function(){view=new Date();view.setDate(1);render()};
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
-document.addEventListener('visibilitychange',function(){if(!document.hidden){var n=ymd(new Date());if(n!==today){today=n;render()}}});
+var hiddenAt=0;
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){hiddenAt=Date.now();return}
+  var n=ymd(new Date());if(n!==today){today=n;render()}
+  // Al volver a la app tras unos segundos fuera, abrir directamente el apunte rápido
+  if(cfg.quick && hiddenAt && Date.now()-hiddenAt>8000 && !$('sheet').classList.contains('open')){ form(null,today,true); }
+});
 
 render();
-if(/[?&]rapido=1/.test(location.search)||location.hash==='#rapido'){ form(null,today,true); }
+if(cfg.quick || /[?&]rapido=1/.test(location.search) || location.hash==='#rapido'){ form(null,today,true); }
 
 if('serviceWorker' in navigator){ window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})}); }
 })();

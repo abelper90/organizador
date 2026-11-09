@@ -1,6 +1,6 @@
 // Service worker: deja la app disponible sin conexión.
 // Si cambias archivos de la app, sube el número de versión.
-var CACHE = 'organizador-v2';
+var CACHE = 'organizador-v3';
 var FILES = ['./', 'index.html', 'manifest.json', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', function (e) {
