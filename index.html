@@ -26,45 +26,58 @@ html,body{margin:0;background:var(--bg);color:var(--ink);
   font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 body{padding:env(safe-area-inset-top) 16px calc(env(safe-area-inset-bottom) + 90px)}
 .app{max-width:1000px;margin:0 auto}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px}
+header{display:flex;align-items:center;gap:12px;padding:14px 0 10px}
 h1{font-size:22px;margin:0;letter-spacing:-.02em}
 .iconbtn{background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:12px;
-  min-width:44px;height:44px;font-size:18px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  min-width:44px;height:44px;font-size:18px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit}
+.view{display:none}.view.on{display:block}
 .layout{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
-@media (min-width:760px){.layout{grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);align-items:start}}
+.layout>div{display:grid;gap:16px;align-content:start;min-width:0}
+@media (min-width:900px){.layout{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:start}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px}
-.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.monthbar .title{font-weight:650;font-size:18px;text-transform:capitalize}
+.cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+h2{font-size:14px;margin:0;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.link{background:none;border:0;color:var(--accent);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:6px 0}
+.monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px}
+.monthbar .title{font-weight:650;font-size:17px;text-align:center;flex:1}
 .monthbar .nav{display:flex;gap:6px}
+.monthbar .iconbtn{min-width:40px;height:40px}
 .dow,.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.dow div{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
-.day{aspect-ratio:1/1.05;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--ink);
-  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;cursor:pointer;font:inherit;font-size:15px}
+.dow div{text-align:center;font-size:12px;color:var(--muted);padding:2px 0}
+.day{border-radius:12px;border:1px solid transparent;background:transparent;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:5px;cursor:pointer;font:inherit;font-size:15px}
+.grid.month .day{aspect-ratio:1/1.05}
+.grid.strip .day{height:54px}
 .day.out{color:var(--muted);opacity:.45}
 .day:active{background:var(--soft)}
-.day.today .num{background:var(--today);color:var(--accent-ink);border-radius:999px;min-width:28px;height:28px;
-  display:flex;align-items:center;justify-content:center;font-weight:700}
-.day .num{min-width:28px;height:28px;display:flex;align-items:center;justify-content:center}
-.dots{display:flex;gap:3px;margin-top:3px;height:6px}
+.day .num{min-width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:999px}
+.day.today .num{background:var(--today);color:var(--accent-ink);font-weight:700}
+.day.first .num::after{content:attr(data-m);position:absolute;font-size:0}
+.dots{display:flex;gap:3px;margin-top:2px;height:6px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .dot.imp{background:var(--imp)}
+.dot.rd{background:transparent;border:1.5px solid var(--muted)}
 .more{font-size:10px;color:var(--muted);line-height:6px}
-h2{font-size:15px;margin:0 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
-.section+.section{margin-top:16px}
 .item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
-.item:first-of-type{border-top:0}
+.item:first-child{border-top:0}
 .item .bar{width:4px;align-self:stretch;border-radius:4px;background:var(--accent);flex:none}
-.item.imp .bar{background:var(--imp)}
-.item .t{font-weight:600}
+.item.rem .bar{background:var(--muted);opacity:.55}
+.item.imp .bar{background:var(--imp);opacity:1}
+.item .t{font-weight:600;overflow-wrap:anywhere}
 .item.done .t{text-decoration:line-through;color:var(--muted)}
-.item .m{font-size:13px;color:var(--muted)}
+.item .m{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.item.late .m.d{color:var(--imp);font-weight:600}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
-.chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;flex:none;cursor:pointer;color:var(--accent);font-size:16px;line-height:1}
+.chk{width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:transparent;flex:none;cursor:pointer;color:var(--accent);font-size:16px;line-height:1;font-family:inherit}
 .chk.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.addrow{display:flex;gap:8px;margin-bottom:6px}
+.addrow input{flex:1;min-width:0}
+.addrow .btn{flex:none;width:auto;padding:0 16px;height:46px}
 .fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 18px);width:60px;height:60px;border-radius:50%;
-  background:var(--accent);color:var(--accent-ink);border:0;font-size:32px;box-shadow:0 8px 24px rgba(0,0,0,.28);cursor:pointer}
-.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:10}
-.backdrop.open{display:block}
+  background:var(--accent);color:var(--accent-ink);border:0;font-size:32px;box-shadow:0 8px 24px rgba(0,0,0,.28);cursor:pointer;z-index:5}
+.backdrop,.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none}
+.backdrop{z-index:10}.scrim{z-index:20}
+.backdrop.open,.scrim.open{display:block}
 .sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow:auto;background:var(--card);
   border-radius:22px 22px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 20px);z-index:11;
   transform:translateY(105%);transition:transform .22s ease;max-width:640px;margin:0 auto}
@@ -84,50 +97,129 @@ input[type=date],input[type=time]{-webkit-appearance:none;appearance:none;min-wi
 .btn{flex:1;height:48px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.danger{color:var(--imp)}
+.seg{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px;margin:8px 0 2px}
+.seg button{flex:1;height:38px;border:0;border-radius:9px;background:transparent;color:var(--muted);font:inherit;font-weight:600;cursor:pointer}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
 .banner{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:12px;font-size:14px;display:none}
 .banner.show{display:flex;gap:10px;align-items:center;justify-content:space-between}
 .banner button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:8px 12px;font:inherit;font-weight:600;cursor:pointer}
-.menu .btn{margin-bottom:10px;width:100%}
 .small{font-size:13px;color:var(--muted)}
+.stack .btn{width:100%;margin-bottom:10px;flex:none}
+.snap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.snap:first-child{border-top:0}
+.snap .btn{flex:none;width:auto;height:38px;padding:0 14px;font-size:14px}
+/* menú lateral */
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(82vw,320px);background:var(--card);z-index:21;
+  transform:translateX(-105%);transition:transform .22s ease;padding:calc(env(safe-area-inset-top) + 18px) 14px 24px;
+  border-right:1px solid var(--line);overflow:auto}
+.drawer.open{transform:none}
+.drawer .dhead{font-size:20px;font-weight:700;margin:6px 8px 16px}
+.drawer button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);
+  font:inherit;font-size:17px;padding:13px 12px;border-radius:12px;cursor:pointer}
+.drawer button.on{background:var(--soft);color:var(--accent);font-weight:650}
+.drawer .ic{width:24px;text-align:center}
+.drawer .hint{margin:18px 10px 0;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <h1>Organizador</h1>
-    <button class="iconbtn" id="btnMenu" aria-label="Ajustes y copia de seguridad">⚙︎</button>
+    <button class="iconbtn" id="btnMenu" aria-label="Abrir menú">☰</button>
+    <h1 id="viewTitle">Inicio</h1>
   </header>
   <div class="banner" id="banner"><span id="bannerTxt"></span><button id="bannerBtn">Guardar copia</button></div>
-  <div class="layout">
-    <section class="card" aria-label="Calendario">
+
+  <!-- INICIO -->
+  <section class="view on" id="v-home">
+    <div class="layout">
+      <div>
+        <div class="card" aria-label="Calendario de dos semanas">
+          <div class="monthbar">
+            <button class="iconbtn" id="sPrev" aria-label="Anterior">‹</button>
+            <div class="title" id="stripTitle"></div>
+            <div class="nav">
+              <button class="iconbtn" id="sToday" aria-label="Hoy" style="font-size:14px;padding:0 10px">Hoy</button>
+              <button class="iconbtn" id="sNext" aria-label="Siguiente">›</button>
+            </div>
+          </div>
+          <div class="dow"><div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
+          <div class="grid strip" id="strip"></div>
+        </div>
+        <div class="card"><div class="cardhead"><h2>Hoy</h2></div><div id="listToday"></div></div>
+      </div>
+      <div>
+        <div class="card"><div class="cardhead"><h2>Importante</h2></div><div id="listImp"></div></div>
+        <div class="card">
+          <div class="cardhead"><h2>Recordatorios</h2><button class="link" data-go="rem" id="remAll"></button></div>
+          <form class="addrow" id="quickRem" autocomplete="off">
+            <input type="text" id="quickRemInput" placeholder="Nuevo recordatorio…" aria-label="Nuevo recordatorio">
+            <button class="btn primary" type="submit">Añadir</button>
+          </form>
+          <div id="listRemHome"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALENDARIO -->
+  <section class="view" id="v-cal">
+    <div class="card">
       <div class="monthbar">
         <button class="iconbtn" id="prev" aria-label="Mes anterior">‹</button>
-        <div class="title" id="monthTitle"></div>
+        <div class="title" id="monthTitle" style="text-transform:capitalize"></div>
         <div class="nav">
-          <button class="iconbtn" id="goToday" aria-label="Hoy" style="font-size:14px;padding:0 12px">Hoy</button>
+          <button class="iconbtn" id="goToday" aria-label="Hoy" style="font-size:14px;padding:0 10px">Hoy</button>
           <button class="iconbtn" id="next" aria-label="Mes siguiente">›</button>
         </div>
       </div>
       <div class="dow"><div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div></div>
-      <div class="grid" id="grid"></div>
-    </section>
-    <aside class="card" aria-label="Importantes">
-      <div class="section"><h2>Hoy</h2><div id="listToday"></div></div>
-      <div class="section"><h2>Importante · próximos 30 días</h2><div id="listImp"></div></div>
-    </aside>
-  </div>
+      <div class="grid month" id="grid"></div>
+    </div>
+  </section>
+
+  <!-- RECORDATORIOS -->
+  <section class="view" id="v-rem">
+    <div class="card">
+      <form class="addrow" id="remForm" autocomplete="off">
+        <input type="text" id="remInput" placeholder="Nuevo recordatorio…" aria-label="Nuevo recordatorio">
+        <button class="btn primary" type="submit">Añadir</button>
+      </form>
+      <div class="cardhead" style="margin-top:10px"><h2>Pendientes</h2></div>
+      <div id="remPending"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="cardhead"><h2>Hechos</h2><button class="link" data-act="clearDone">Borrar hechos</button></div>
+      <div id="remDone"></div>
+    </div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section class="view" id="v-set">
+    <div class="card" id="setBody"></div>
+  </section>
 </div>
 
 <button class="fab" id="fab" aria-label="Añadir rápido">+</button>
 <div class="backdrop" id="backdrop"></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="scrim" id="scrim"></div>
+<nav class="drawer" id="drawer" aria-label="Secciones">
+  <div class="dhead">Organizador</div>
+  <button data-go="home"><span class="ic">⌂</span>Inicio</button>
+  <button data-go="cal"><span class="ic">▦</span>Calendario</button>
+  <button data-go="rem"><span class="ic">☑</span>Recordatorios</button>
+  <button data-go="set"><span class="ic">⚙</span>Ajustes y copias</button>
+  <div class="hint">Aquí iremos añadiendo más pestañas.</div>
+</nav>
 
 <script>
 (function(){
 'use strict';
-var KEY='organizador.v1', META='organizador.meta';
+var VERSION='6';
+var KEY='organizador.v1', RKEY='organizador.rem.v1', META='organizador.meta', CFG='organizador.cfg';
 var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 var DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+var TITLES={home:'Inicio',cal:'Calendario',rem:'Recordatorios',set:'Ajustes y copias'};
 
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -135,98 +227,267 @@ function pad(n){return n<10?'0'+n:''+n}
 function ymd(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
 function parse(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function short(s){var d=parse(s);return d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3)}
 
 function read(k,def){try{var v=JSON.parse(localStorage.getItem(k));return v==null?def:v}catch(e){return def}}
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}
 
-var CFG='organizador.cfg';
-var cfg=read(CFG,{quick:true});
 var events=read(KEY,[]);
+var reminders=read(RKEY,[]);
 var meta=read(META,{lastBackup:null,created:ymd(new Date())});
-function save(){ if(!write(KEY,events)) alert('No se pudo guardar. Haz una copia de seguridad ya.'); render(); }
-
+var cfg=read(CFG,{quick:true});
 var today=ymd(new Date());
-var view=new Date(); view.setDate(1);
+var current='home';
+var view=new Date(); view.setDate(1);      // mes del calendario grande
+var anchor=new Date();                      // quincena de la pantalla de inicio
+var openDay=null;
 
 if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
 
-function byDay(d){return events.filter(function(e){return e.date===d}).sort(cmp)}
-function cmp(a,b){return (a.date+(a.time||'99:99')).localeCompare(b.date+(b.time||'99:99'))}
+/* ---------- Guardado + copias automáticas ---------- */
+function save(){
+  var ok=write(KEY,events)&write(RKEY,reminders);
+  if(!ok) alert('No se pudo guardar. Haz una copia de seguridad ya.');
+  scheduleSnap(); render();
+}
 
-/* ---------- Calendario ---------- */
-function render(){
+var DBN='organizador-db', STORE='snaps', lastSnap='', snapTimer=null;
+function idb(){return new Promise(function(res,rej){
+  if(!window.indexedDB) return rej(new Error('sin indexedDB'));
+  var r=indexedDB.open(DBN,1);
+  r.onupgradeneeded=function(){r.result.createObjectStore(STORE,{keyPath:'ts'})};
+  r.onsuccess=function(){res(r.result)}; r.onerror=function(){rej(r.error)};
+})}
+function idbAll(){return idb().then(function(db){return new Promise(function(res,rej){
+  var q=db.transaction(STORE).objectStore(STORE).getAll(); q.onsuccess=function(){res(q.result)}; q.onerror=function(){rej(q.error)}})})}
+function idbPut(o){return idb().then(function(db){return new Promise(function(res,rej){
+  var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).put(o); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
+function idbDel(ts){return idb().then(function(db){return new Promise(function(res,rej){
+  var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).delete(ts); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
+function stateStr(){return JSON.stringify({e:events,r:reminders})}
+function snap(kind){
+  if(!events.length&&!reminders.length) return Promise.resolve();
+  var s=stateStr(); if(kind==='change'&&s===lastSnap) return Promise.resolve();
+  return idbPut({ts:Date.now(),kind:kind,day:today,ne:events.length,nr:reminders.length,data:s})
+    .then(function(){lastSnap=s;return prune()}).catch(function(){});
+}
+function prune(){
+  var lim={daily:30,change:30,pre:5};
+  return idbAll().then(function(all){
+    all.sort(function(a,b){return b.ts-a.ts}); var cnt={}, del=[];
+    all.forEach(function(r){cnt[r.kind]=(cnt[r.kind]||0)+1; if(cnt[r.kind]>(lim[r.kind]||10)) del.push(r.ts)});
+    return Promise.all(del.map(idbDel));
+  });
+}
+function scheduleSnap(){clearTimeout(snapTimer);snapTimer=setTimeout(function(){snapTimer=null;snap('change')},1500)}
+function flushSnap(){if(snapTimer){clearTimeout(snapTimer);snapTimer=null;snap('change')}}
+function ensureDaily(){
+  idbAll().then(function(all){
+    all.sort(function(a,b){return b.ts-a.ts});
+    if(all.length) lastSnap=all[0].data;
+    if(!all.some(function(r){return r.kind==='daily'&&r.day===today})) snap('daily');
+  }).catch(function(){});
+}
+function restoreSnap(ts){
+  idbAll().then(function(all){
+    var r=all.filter(function(x){return x.ts===ts})[0]; if(!r) return;
+    if(!confirm('¿Restaurar esta copia ('+r.ne+' eventos, '+r.nr+' recordatorios)? Se guarda antes una copia de lo actual.')) return;
+    snap('pre').then(function(){
+      var d=JSON.parse(r.data); events=d.e||[]; reminders=d.r||[]; save();
+    });
+  }).catch(function(){});
+}
+
+/* ---------- Datos ---------- */
+function cmp(a,b){return (a.date+(a.time||'99:99')).localeCompare(b.date+(b.time||'99:99'))}
+function byDay(d){return events.filter(function(e){return e.date===d}).sort(cmp)}
+function remByDay(d){return reminders.filter(function(r){return r.date===d&&!r.done})}
+function pendingRem(){
+  return reminders.filter(function(r){return !r.done}).sort(function(a,b){
+    var ad=a.date||'9999-99-99', bd=b.date||'9999-99-99';
+    return (ad+(a.time||'99:99')).localeCompare(bd+(b.time||'99:99'))||(a.created||0)-(b.created||0);
+  });
+}
+
+/* ---------- Pintado ---------- */
+function itemHtml(it,k,showDate){
+  var m=[], late=(k==='r'&&it.date&&it.date<today&&!it.done);
+  if(showDate&&it.date){var d=parse(it.date); m.push(DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3))}
+  if(it.time) m.push(it.time);
+  var meta2=m.length?'<div class="m d">'+(late?'Vencido · ':'')+esc(m.join(' · '))+'</div>':(late?'<div class="m d">Vencido</div>':'');
+  var note=it.notes?'<div class="m">'+esc(it.notes.slice(0,80))+'</div>':'';
+  return '<div class="item'+(k==='r'?' rem':'')+(it.important?' imp':'')+(it.done?' done':'')+(late?' late':'')+'" data-id="'+it.id+'" data-k="'+k+'">'+
+    '<span class="bar"></span><div style="flex:1;min-width:0"><div class="t">'+esc(it.title)+'</div>'+meta2+note+'</div>'+
+    '<button class="chk'+(it.done?' on':'')+'" data-chk="'+it.id+'" data-k="'+k+'" aria-label="Marcar hecho">'+(it.done?'✓':'')+'</button></div>';
+}
+function dotsFor(s){
+  var ev=byDay(s), rm=remByDay(s), out=[];
+  ev.forEach(function(e){out.push('<span class="dot'+(e.important?' imp':'')+'"></span>')});
+  rm.forEach(function(){out.push('<span class="dot rd"></span>')});
+  return out.slice(0,3).join('')+(out.length>3?'<span class="more">+</span>':'');
+}
+function dayBtn(d,cls){
+  var s=ymd(d);
+  return '<button class="day '+cls+(s===today?' today':'')+'" data-d="'+s+'" aria-label="'+d.getDate()+' de '+MONTHS[d.getMonth()]+'"><span class="num">'+d.getDate()+'</span><span class="dots">'+dotsFor(s)+'</span></button>';
+}
+
+function renderHome(){
+  var st=new Date(anchor); st.setHours(0,0,0,0); st.setDate(st.getDate()-((st.getDay()+6)%7));
+  var en=new Date(st); en.setDate(st.getDate()+13);
+  $('stripTitle').textContent=st.getDate()+' '+MONTHS[st.getMonth()].slice(0,3)+' – '+en.getDate()+' '+MONTHS[en.getMonth()].slice(0,3)+(en.getFullYear()!==new Date().getFullYear()?' '+en.getFullYear():'');
+  var h='';
+  for(var i=0;i<14;i++){var d=new Date(st); d.setDate(st.getDate()+i); h+=dayBtn(d,'')}
+  $('strip').innerHTML=h;
+
+  var evT=byDay(today), rmT=pendingRem().filter(function(r){return r.date&&r.date<=today});
+  var tHtml=evT.map(function(e){return itemHtml(e,'e',false)}).join('')+rmT.map(function(r){return itemHtml(r,'r',r.date<today)}).join('');
+  $('listToday').innerHTML=tHtml||'<div class="empty">Nada para hoy.</div>';
+
+  var lim=new Date(); lim.setDate(lim.getDate()+30); var limS=ymd(lim);
+  var imp=[];
+  events.forEach(function(e){if(e.important&&!e.done&&e.date>today&&e.date<=limS) imp.push({k:'e',it:e})});
+  reminders.forEach(function(r){if(r.important&&!r.done&&(!r.date||r.date>today)) imp.push({k:'r',it:r})});
+  imp.sort(function(a,b){return ((a.it.date||'9999')+(a.it.time||'99:99')).localeCompare((b.it.date||'9999')+(b.it.time||'99:99'))});
+  $('listImp').innerHTML=imp.length?imp.map(function(x){return itemHtml(x.it,x.k,true)}).join(''):'<div class="empty">Nada importante en los próximos días.</div>';
+
+  var pend=pendingRem(), top=pend.slice(0,6);
+  $('listRemHome').innerHTML=top.length?top.map(function(r){return itemHtml(r,'r',true)}).join(''):'<div class="empty">Sin recordatorios pendientes.</div>';
+  $('remAll').textContent=pend.length>6?'Ver todos ('+pend.length+')':(pend.length?'Abrir':'');
+}
+
+function renderCal(){
   $('monthTitle').textContent=MONTHS[view.getMonth()]+' '+view.getFullYear();
   var first=new Date(view.getFullYear(),view.getMonth(),1);
-  var offset=(first.getDay()+6)%7;
-  var start=new Date(first); start.setDate(1-offset);
-  var html='';
+  var start=new Date(first); start.setDate(1-((first.getDay()+6)%7));
+  var h='';
   for(var i=0;i<42;i++){
     var d=new Date(start); d.setDate(start.getDate()+i);
-    var s=ymd(d), evs=byDay(s);
-    var cls='day'+(d.getMonth()!==view.getMonth()?' out':'')+(s===today?' today':'');
-    var dots=evs.slice(0,3).map(function(e){return '<span class="dot'+(e.important?' imp':'')+'"></span>'}).join('')+(evs.length>3?'<span class="more">+</span>':'');
-    html+='<button class="'+cls+'" data-d="'+s+'" aria-label="'+d.getDate()+' de '+MONTHS[d.getMonth()]+', '+evs.length+' eventos"><span class="num">'+d.getDate()+'</span><span class="dots">'+dots+'</span></button>';
+    h+=dayBtn(d,d.getMonth()!==view.getMonth()?'out':'');
     if(i===34 && new Date(start.getFullYear(),start.getMonth(),start.getDate()+35).getMonth()!==view.getMonth()) break;
   }
-  $('grid').innerHTML=html;
-  renderSide(); renderBanner();
+  $('grid').innerHTML=h;
 }
 
-function itemHtml(e,showDate){
-  var m=[]; if(showDate){var d=parse(e.date); m.push(DAYS[d.getDay()].slice(0,3)+' '+d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3))}
-  if(e.time) m.push(e.time);
-  return '<div class="item'+(e.important?' imp':'')+(e.done?' done':'')+'" data-id="'+e.id+'">'+
-    '<span class="bar"></span><div style="flex:1;min-width:0"><div class="t">'+esc(e.title)+'</div>'+
-    (m.length?'<div class="m">'+esc(m.join(' · '))+'</div>':'')+(e.notes?'<div class="m">'+esc(e.notes.slice(0,80))+'</div>':'')+'</div>'+
-    '<button class="chk'+(e.done?' on':'')+'" data-chk="'+e.id+'" aria-label="Marcar hecho">'+(e.done?'✓':'')+'</button></div>';
+function renderRem(){
+  var p=pendingRem();
+  $('remPending').innerHTML=p.length?p.map(function(r){return itemHtml(r,'r',true)}).join(''):'<div class="empty">Todo al día. Nada pendiente.</div>';
+  var dn=reminders.filter(function(r){return r.done}).sort(function(a,b){return (b.doneAt||0)-(a.doneAt||0)}).slice(0,30);
+  $('remDone').innerHTML=dn.length?dn.map(function(r){return itemHtml(r,'r',true)}).join(''):'<div class="empty">Aún no has completado ninguno.</div>';
 }
 
-function renderSide(){
-  var t=byDay(today);
-  $('listToday').innerHTML=t.length?t.map(function(e){return itemHtml(e,false)}).join(''):'<div class="empty">Nada para hoy.</div>';
-  var lim=new Date(); lim.setDate(lim.getDate()+30); var limS=ymd(lim);
-  var imp=events.filter(function(e){return e.important&&!e.done&&e.date>today&&e.date<=limS}).sort(cmp);
-  $('listImp').innerHTML=imp.length?imp.map(function(e){return itemHtml(e,true)}).join(''):'<div class="empty">Sin eventos importantes próximos.</div>';
+function fmtTs(ts){var d=new Date(ts);return d.getDate()+' '+MONTHS[d.getMonth()].slice(0,3)+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function renderSet(){
+  $('setBody').innerHTML=
+    '<h2>Copias automáticas</h2>'+
+    '<p class="small">Se guarda una copia sola cada día y otra después de cada cambio (las últimas 30 de cada tipo). Viven en este móvil: te protegen de un borrón o un error, pero no si borras la app.</p>'+
+    '<div id="snapList" class="small">Cargando…</div>'+
+    '<h2 style="margin-top:22px">Copia fuera del móvil</h2>'+
+    '<div class="stack" style="margin-top:8px"><button class="btn primary" data-act="export">Guardar copia en un archivo</button>'+
+    '<button class="btn" data-act="import">Restaurar desde un archivo</button>'+
+    '<input type="file" id="file" accept="application/json,.json" hidden></div>'+
+    '<h2 style="margin-top:22px">Calendario del iPhone</h2>'+
+    '<div class="stack" style="margin-top:8px"><button class="btn" data-act="icsall">Añadir mis eventos al Calendario</button>'+
+    '<button class="btn" data-act="icsimport">Importar horario (.ics)</button>'+
+    '<button class="btn danger" data-act="icsdel">Borrar eventos importados</button>'+
+    '<input type="file" id="icsfile" accept=".ics,text/calendar" hidden></div>'+
+    '<h2 style="margin-top:22px">Preferencias</h2>'+
+    '<label class="toggle" style="margin:8px 0 14px"><input type="checkbox" id="cfgQuick"'+(cfg.quick?' checked':'')+'> Al abrir la app, mostrar directamente «Apunte rápido»</label>'+
+    '<div class="small">'+events.length+' eventos · '+reminders.length+' recordatorios · última copia en archivo: '+(meta.lastBackup||'nunca')+'<br>Versión '+VERSION+'</div>';
+  $('file').onchange=function(){ if(this.files[0]) importData(this.files[0]) };
+  $('icsfile').onchange=function(){ if(this.files[0]) importICS(this.files[0]) };
+  $('cfgQuick').onchange=function(){ cfg.quick=this.checked; write(CFG,cfg); };
+  idbAll().then(function(all){
+    all.sort(function(a,b){return b.ts-a.ts}); all=all.slice(0,15);
+    var names={daily:'Diaria',change:'Tras un cambio',pre:'Antes de restaurar'};
+    $('snapList').innerHTML=all.length?all.map(function(r){
+      return '<div class="snap"><div><div style="color:var(--ink);font-weight:600">'+fmtTs(r.ts)+'</div><div>'+names[r.kind]+' · '+r.ne+' eventos · '+r.nr+' recordatorios</div></div>'+
+        '<button class="btn" data-act="restore" data-ts="'+r.ts+'">Restaurar</button></div>';
+    }).join(''):'Aún no hay copias. Se crean solas en cuanto apuntes algo.';
+  }).catch(function(){ if($('snapList')) $('snapList').textContent='Las copias automáticas no están disponibles en este navegador.' });
+}
+
+function renderBanner(){
+  var b=$('banner'); if(current!=='home'||(!events.length&&!reminders.length)){b.classList.remove('show');return}
+  var days=meta.lastBackup?Math.floor((parse(today)-parse(meta.lastBackup))/864e5):999;
+  if(days>=30){ $('bannerTxt').textContent=meta.lastBackup?'Hace '+days+' días de tu última copia en archivo.':'Aún no has guardado ninguna copia fuera del móvil.'; b.classList.add('show') }
+  else b.classList.remove('show');
+}
+
+function render(){
+  if(current==='home') renderHome(); else if(current==='cal') renderCal(); else if(current==='rem') renderRem(); else renderSet();
+  renderBanner();
+}
+
+/* ---------- Navegación ---------- */
+function openMenu(){ $('drawer').classList.add('open'); $('scrim').classList.add('open') }
+function closeMenu(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open') }
+function go(v){
+  current=v; closeMenu(); closeSheet();
+  ['home','cal','rem','set'].forEach(function(n){
+    $('v-'+n).classList.toggle('on',n===v);
+    var b=document.querySelector('#drawer [data-go='+n+']'); if(b) b.classList.toggle('on',n===v);
+  });
+  $('viewTitle').textContent=TITLES[v]; window.scrollTo(0,0); render();
 }
 
 /* ---------- Hojas ---------- */
 function openSheet(html){ $('sheet').innerHTML=html; $('sheet').classList.add('open'); $('backdrop').classList.add('open'); $('sheet').scrollTop=0; }
-function closeSheet(){ $('sheet').classList.remove('open'); $('backdrop').classList.remove('open'); }
+function closeSheet(){ openDay=null; $('sheet').classList.remove('open'); $('backdrop').classList.remove('open'); }
 
 function dayView(s){
-  var d=parse(s), evs=byDay(s);
+  openDay=s;
+  var d=parse(s), ev=byDay(s), rm=remByDay(s), n=ev.length+rm.length;
   openSheet('<h3>'+DAYS[d.getDay()]+' '+d.getDate()+' de '+MONTHS[d.getMonth()]+'</h3>'+
-    '<div class="sub">'+(evs.length?evs.length+' evento'+(evs.length>1?'s':''):'Sin eventos')+'</div>'+
-    '<div>'+evs.map(function(e){return itemHtml(e,false)}).join('')+'</div>'+
-    '<div class="btns"><button class="btn" data-act="close">Cerrar</button><button class="btn primary" data-act="new" data-d="'+s+'">+ Añadir</button></div>');
+    '<div class="sub">'+(n?n+' elemento'+(n>1?'s':''):'Nada apuntado')+'</div>'+
+    '<div>'+ev.map(function(e){return itemHtml(e,'e',false)}).join('')+rm.map(function(r){return itemHtml(r,'r',false)}).join('')+'</div>'+
+    '<div class="btns"><button class="btn" data-act="close">Cerrar</button>'+
+    '<button class="btn" data-act="new" data-k="r" data-d="'+s+'">+ Recordatorio</button>'+
+    '<button class="btn primary" data-act="new" data-k="e" data-d="'+s+'">+ Evento</button></div>');
 }
 
-function form(e,dateDefault,quick){
-  var isNew=!e; e=e||{title:'',date:dateDefault||today,time:'',important:false,notes:''};
-  openSheet('<h3>'+(isNew?(quick?'Apunte rápido':'Nuevo evento'):'Editar evento')+'</h3>'+
+function form(kind,item,opts){
+  opts=opts||{}; var isNew=!item, type=kind;
+  var b=item||{title:'',date:opts.date||(kind==='e'?today:''),time:'',important:false,notes:''};
+  var head=isNew?(opts.quick?'Apunte rápido':'Nuevo'):(kind==='e'?'Editar evento':'Editar recordatorio');
+  openSheet('<h3>'+head+'</h3>'+
+    (isNew?'<div class="seg" id="seg"><button type="button" data-type="r" class="'+(kind==='r'?'on':'')+'">Recordatorio</button><button type="button" data-type="e" class="'+(kind==='e'?'on':'')+'">Evento</button></div>':'')+
     '<form id="f" autocomplete="off">'+
-    '<label for="ft">Título</label><input type="text" id="ft" value="'+esc(e.title)+'" placeholder="¿Qué tienes que recordar?" required>'+
-    '<div class="row"><div><label for="fd">Día</label><input type="date" id="fd" value="'+e.date+'" required></div>'+
-    '<div><label for="fh">Hora (opcional)</label><input type="time" id="fh" value="'+(e.time||'')+'"></div></div>'+
-    '<label class="toggle"><input type="checkbox" id="fi"'+(e.important?' checked':'')+'> Importante</label>'+
-    '<label for="fn">Notas</label><textarea id="fn">'+esc(e.notes||'')+'</textarea>'+
-    (isNew?'':'<button type="button" class="btn" data-act="ical" data-id="'+e.id+'" style="margin-top:16px;width:100%;flex:none">Añadir al Calendario del iPhone</button>')+
-    '<div class="btns">'+(isNew?'':'<button type="button" class="btn danger" data-act="del" data-id="'+e.id+'">Borrar</button>')+
+    '<label for="ft">Título</label><input type="text" id="ft" value="'+esc(b.title)+'" placeholder="¿Qué tienes que recordar?" required>'+
+    '<div class="row"><div><label for="fd" id="fdl">Día</label><input type="date" id="fd" value="'+(b.date||'')+'"></div>'+
+    '<div><label for="fh">Hora (opcional)</label><input type="time" id="fh" value="'+(b.time||'')+'"></div></div>'+
+    '<label class="toggle"><input type="checkbox" id="fi"'+(b.important?' checked':'')+'> Importante</label>'+
+    '<label for="fn">Notas</label><textarea id="fn">'+esc(b.notes||'')+'</textarea>'+
+    ((!isNew&&kind==='e')?'<button type="button" class="btn" data-act="ical" data-id="'+item.id+'" style="margin-top:16px;width:100%;flex:none">Añadir al Calendario del iPhone</button>':'')+
+    '<div class="btns">'+(isNew?'':'<button type="button" class="btn danger" data-act="del" data-k="'+kind+'" data-id="'+item.id+'">Borrar</button>')+
     '<button type="button" class="btn" data-act="close">Cancelar</button><button type="submit" class="btn primary">Guardar</button></div></form>');
+  function sync(){ $('fdl').textContent=type==='e'?'Día':'Día (opcional)'; if(type==='e'&&!$('fd').value) $('fd').value=today; }
+  sync();
+  if(isNew) $('seg').onclick=function(ev){
+    var t=ev.target.closest('[data-type]'); if(!t) return; type=t.getAttribute('data-type');
+    Array.prototype.forEach.call($('seg').children,function(x){x.classList.toggle('on',x===t)}); sync();
+  };
   $('f').onsubmit=function(ev){
     ev.preventDefault();
     var title=$('ft').value.trim(); if(!title){$('ft').focus();return}
-    var obj={id:isNew?uid():e.id,title:title,date:$('fd').value||today,time:$('fh').value,important:$('fi').checked,notes:$('fn').value.trim(),done:isNew?false:!!e.done};
-    if(isNew) events.push(obj); else events=events.map(function(x){return x.id===obj.id?obj:x});
+    var date=$('fd').value; if(type==='e'&&!date) date=today;
+    var vals={title:title,date:date||'',time:date?$('fh').value:'',important:$('fi').checked,notes:$('fn').value.trim()};
+    if(isNew){
+      if(type==='e') events.push(Object.assign({id:uid(),done:false},vals));
+      else reminders.push(Object.assign({id:uid(),done:false,created:Date.now()},vals));
+    }else{
+      var list=kind==='e'?events:reminders;
+      for(var i=0;i<list.length;i++) if(list[i].id===item.id) list[i]=Object.assign({},list[i],vals);
+    }
     save(); closeSheet();
-    if(!quick){var dd=parse(obj.date); view=new Date(dd.getFullYear(),dd.getMonth(),1); render();}
+    if(type==='e'&&current==='cal'){var dd=parse(vals.date); view=new Date(dd.getFullYear(),dd.getMonth(),1); render()}
   };
   if(isNew) setTimeout(function(){$('ft').focus()},250);
 }
+function quickForm(){ form('r',null,{quick:true}) }
 
-/* ---------- Copia de seguridad ---------- */
+/* ---------- Copia en archivo ---------- */
 function exportData(){
-  var blob=new Blob([JSON.stringify({app:'organizador',version:1,exported:new Date().toISOString(),events:events},null,2)],{type:'application/json'});
+  var blob=new Blob([JSON.stringify({app:'organizador',version:2,exported:new Date().toISOString(),events:events,reminders:reminders},null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='organizador-copia-'+today+'.json';
   document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
   meta.lastBackup=today; write(META,meta); render();
@@ -236,35 +497,14 @@ function importData(file){
   r.onload=function(){
     try{
       var j=JSON.parse(r.result); if(!j||!Array.isArray(j.events)) throw 0;
-      var ids={}; events.forEach(function(e){ids[e.id]=1});
-      var added=0; j.events.forEach(function(e){ if(e&&e.id&&e.title&&e.date&&!ids[e.id]){events.push({id:String(e.id),title:String(e.title),date:String(e.date),time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done});added++} });
-      save(); closeSheet(); alert('Importados '+added+' eventos nuevos.');
+      var ids={}, rids={}; events.forEach(function(e){ids[e.id]=1}); reminders.forEach(function(e){rids[e.id]=1});
+      var added=0;
+      j.events.forEach(function(e){ if(e&&e.id&&e.title&&e.date&&!ids[e.id]){events.push({id:String(e.id),title:String(e.title),date:String(e.date),time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,src:e.src});added++} });
+      (j.reminders||[]).forEach(function(e){ if(e&&e.id&&e.title&&!rids[e.id]){reminders.push({id:String(e.id),title:String(e.title),date:e.date||'',time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,created:e.created||Date.now(),doneAt:e.doneAt});added++} });
+      save(); alert('Importados '+added+' elementos nuevos.');
     }catch(x){alert('El archivo no es una copia válida.')}
   };
   r.readAsText(file);
-}
-function menu(){
-  openSheet('<h3>Ajustes</h3><div class="sub">Tus datos viven solo en este dispositivo. No hay cuentas ni servidores.</div>'+
-    '<div class="menu"><button class="btn primary" data-act="export">Guardar copia de seguridad</button>'+
-    '<button class="btn" data-act="import">Restaurar desde copia</button>'+
-    '<div class="small" style="margin:14px 0 8px">Calendario del iPhone</div>'+
-    '<button class="btn" data-act="icsall">Añadir mis eventos al Calendario</button>'+
-    '<button class="btn" data-act="icsimport">Importar horario (.ics)</button>'+
-    '<button class="btn danger" data-act="icsdel">Borrar eventos importados</button>'+
-    '<input type="file" id="icsfile" accept=".ics,text/calendar" hidden>'+
-    '<input type="file" id="file" accept="application/json,.json" hidden>'+
-    '<label class="toggle" style="margin:6px 0 14px"><input type="checkbox" id="cfgQuick"'+(cfg.quick?' checked':'')+'> Al abrir la app, mostrar directamente «Apunte rápido»</label>'+
-    '<div class="small">'+events.length+' eventos guardados. Última copia: '+(meta.lastBackup||'nunca')+'.<br>Versión 5</div></div>'+
-    '<div class="btns"><button class="btn" data-act="close">Cerrar</button></div>');
-  $('file').onchange=function(){ if(this.files[0]) importData(this.files[0]) };
-  $('icsfile').onchange=function(){ if(this.files[0]) importICS(this.files[0]) };
-  $('cfgQuick').onchange=function(){ cfg.quick=this.checked; write(CFG,cfg); };
-}
-function renderBanner(){
-  var b=$('banner'); if(!events.length){b.classList.remove('show');return}
-  var days=meta.lastBackup?Math.floor((parse(today)-parse(meta.lastBackup))/864e5):999;
-  if(days>=14){ $('bannerTxt').textContent=meta.lastBackup?'Hace '+days+' días de tu última copia.':'Aún no has guardado ninguna copia de seguridad.'; b.classList.add('show') }
-  else b.classList.remove('show');
 }
 
 /* ---------- Calendario del iPhone (.ics) ---------- */
@@ -368,58 +608,82 @@ function importICS(file){
           else{events.push({id:id,title:e.title,date:o.date,time:o.time,important:false,notes:notes,done:false,src:'ics'});added++}
         });
       });
-      save(); closeSheet(); alert('Importados '+added+' eventos nuevos y '+updated+' actualizados (de hace 30 días a 13 meses vista).');
+      save(); alert('Importados '+added+' eventos nuevos y '+updated+' actualizados (de hace 30 días a 13 meses vista).');
     }catch(x){alert('No he podido leer ese archivo. Tiene que ser un calendario .ics.')}
   };
   r.readAsText(file);
 }
 
 /* ---------- Eventos de interfaz ---------- */
+function find(list,id){return list.filter(function(x){return x.id===id})[0]}
+function addReminder(title){
+  title=title.trim(); if(!title) return;
+  reminders.push({id:uid(),title:title,date:'',time:'',important:false,notes:'',done:false,created:Date.now()}); save();
+}
+
 document.addEventListener('click',function(ev){
   var t=ev.target;
   var chk=t.closest('[data-chk]');
-  if(chk){ev.stopPropagation();var id=chk.getAttribute('data-chk');events=events.map(function(e){if(e.id===id)e.done=!e.done;return e});save();
-    if($('sheet').classList.contains('open')&&$('sheet').querySelector('h3')&&!$('f')){var sub=$('sheet').getAttribute('data-day'); if(sub) dayView(sub)} return}
+  if(chk){
+    ev.stopPropagation(); var id=chk.getAttribute('data-chk'), k=chk.getAttribute('data-k');
+    var it=find(k==='e'?events:reminders,id);
+    if(it){ it.done=!it.done; if(k==='r') it.doneAt=it.done?Date.now():null; }
+    var day=openDay; save(); if(day&&$('sheet').classList.contains('open')) dayView(day);
+    return;
+  }
+  var go1=t.closest('[data-go]'); if(go1){go(go1.getAttribute('data-go'));return}
   var act=t.closest('[data-act]');
-  if(act){var a=act.getAttribute('data-act');
+  if(act){
+    var a=act.getAttribute('data-act');
     if(a==='close') closeSheet();
-    else if(a==='new') form(null,act.getAttribute('data-d'));
-    else if(a==='del'){ if(confirm('¿Borrar este evento?')){events=events.filter(function(e){return e.id!==act.getAttribute('data-id')});save();closeSheet()} }
-    else if(a==='ical'){var one=events.filter(function(x){return x.id===act.getAttribute('data-id')})[0]; if(one) sendICS([one],'evento.ics')}
+    else if(a==='new') form(act.getAttribute('data-k')||'e',null,{date:act.getAttribute('data-d')});
+    else if(a==='del'){ if(confirm('¿Borrar esto?')){var kk=act.getAttribute('data-k'),di=act.getAttribute('data-id'); if(kk==='e') events=events.filter(function(e){return e.id!==di}); else reminders=reminders.filter(function(e){return e.id!==di}); save(); closeSheet()} }
+    else if(a==='ical'){var one=find(events,act.getAttribute('data-id')); if(one) sendICS([one],'evento.ics')}
     else if(a==='icsall') sendICS(events.filter(function(x){return x.src!=='ics'}),'organizador.ics');
     else if(a==='icsimport') $('icsfile').click();
-    else if(a==='icsdel'){ var k=events.filter(function(x){return x.src==='ics'}).length; if(k&&confirm('¿Borrar los '+k+' eventos importados? No toca los que creaste tú.')){events=events.filter(function(x){return x.src!=='ics'});save();closeSheet()} else if(!k) alert('No hay eventos importados.') }
+    else if(a==='icsdel'){ var n=events.filter(function(x){return x.src==='ics'}).length; if(n&&confirm('¿Borrar los '+n+' eventos importados? No toca los que creaste tú.')){events=events.filter(function(x){return x.src!=='ics'});save()} else if(!n) alert('No hay eventos importados.') }
     else if(a==='export') exportData();
     else if(a==='import') $('file').click();
-    return}
-  var day=t.closest('.day'); if(day){var s=day.getAttribute('data-d');$('sheet').setAttribute('data-day',s);dayView(s);return}
-  var item=t.closest('.item'); if(item){var e=events.filter(function(x){return x.id===item.getAttribute('data-id')})[0]; if(e) form(e)}
+    else if(a==='restore') restoreSnap(+act.getAttribute('data-ts'));
+    else if(a==='clearDone'){ var n2=reminders.filter(function(r){return r.done}).length; if(n2&&confirm('¿Borrar los '+n2+' recordatorios hechos?')){reminders=reminders.filter(function(r){return !r.done});save()} }
+    return;
+  }
+  var day2=t.closest('.day'); if(day2){dayView(day2.getAttribute('data-d'));return}
+  var item=t.closest('.item'); if(item){var k2=item.getAttribute('data-k'), e2=find(k2==='e'?events:reminders,item.getAttribute('data-id')); if(e2) form(k2,e2)}
 });
 $('backdrop').onclick=closeSheet;
-$('fab').onclick=function(){form(null,today,true)};
-$('btnMenu').onclick=menu;
+$('scrim').onclick=closeMenu;
+$('btnMenu').onclick=openMenu;
+$('fab').onclick=quickForm;
 $('bannerBtn').onclick=exportData;
+$('sPrev').onclick=function(){anchor.setDate(anchor.getDate()-14);render()};
+$('sNext').onclick=function(){anchor.setDate(anchor.getDate()+14);render()};
+$('sToday').onclick=function(){anchor=new Date();render()};
 $('prev').onclick=function(){view.setMonth(view.getMonth()-1);render()};
 $('next').onclick=function(){view.setMonth(view.getMonth()+1);render()};
 $('goToday').onclick=function(){view=new Date();view.setDate(1);render()};
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet()});
+$('quickRem').onsubmit=function(e){e.preventDefault();addReminder($('quickRemInput').value);$('quickRemInput').value=''};
+$('remForm').onsubmit=function(e){e.preventDefault();addReminder($('remInput').value);$('remInput').value=''};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSheet();closeMenu()}});
+
 var hiddenAt=0;
 document.addEventListener('visibilitychange',function(){
-  if(document.hidden){hiddenAt=Date.now();return}
-  var n=ymd(new Date());if(n!==today){today=n;render()}
-  // Al volver a la app tras unos segundos fuera, abrir directamente el apunte rápido
-  if(cfg.quick && hiddenAt && Date.now()-hiddenAt>8000 && !$('sheet').classList.contains('open')){ form(null,today,true); }
+  if(document.hidden){hiddenAt=Date.now();flushSnap();return}
+  var n=ymd(new Date());
+  if(n!==today){today=n;anchor=new Date();ensureDaily();render()}
+  if(cfg.quick && hiddenAt && Date.now()-hiddenAt>8000 && !$('sheet').classList.contains('open')){ quickForm(); }
 });
+window.addEventListener('pagehide',flushSnap);
 
-render();
-if(cfg.quick || /[?&]rapido=1/.test(location.search) || location.hash==='#rapido'){ form(null,today,true); }
+go('home');
+ensureDaily();
+if(cfg.quick || /[?&]rapido=1/.test(location.search) || location.hash==='#rapido'){ quickForm(); }
 
 if('serviceWorker' in navigator){
   var reloaded=false, hadSW=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',function(){
-    // Versión nueva activa: recargar una vez, salvo que estés escribiendo algo
     if(reloaded||!hadSW) return;
-    if($('sheet').classList.contains('open')){ return }
+    if($('sheet').classList.contains('open')) return;
     reloaded=true; location.reload();
   });
   window.addEventListener('load',function(){
