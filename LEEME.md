@@ -11,12 +11,12 @@ Los datos se guardan **solo en tu teléfono**.
 
 ## Instalarla en el iPhone (una sola vez)
 Para que iOS la instale hace falta que se sirva por **https** una primera vez. Después funciona sin internet.
-1. Sube la carpeta `Organizador` a un hosting estático (GitHub Pages, Netlify, Cloudflare Pages). Solo subes el código; nunca tus datos.
+1. Ya está publicada en https://abelper90.github.io/organizador/ (GitHub Pages). Solo contiene el código; nunca tus datos.
 2. Abre la dirección en **Safari** → Compartir → **Añadir a pantalla de inicio**.
 3. Abre la app desde el icono. Quedan guardados el código y los datos en el teléfono; sin Wi-Fi ni datos sigue funcionando.
 
 ## Botón en el Centro de control (iOS 18 o superior)
-1. App **Atajos** → nuevo atajo → acción **Abrir URL** con `https://TU-DIRECCION/?rapido=1`.
+1. App **Atajos** → nuevo atajo → acción **Abrir URL** con `https://abelper90.github.io/organizador/?rapido=1`.
    (O mejor aún: acción **Añadir nuevo recordatorio** de Recordatorios si quieres que salga en la app de Apple.)
 2. Ajustes → Centro de control → **Añadir un control** → Atajos → elige ese atajo.
 3. Desliza hacia abajo desde arriba a la derecha y pulsa el control: se abre el formulario rápido.
