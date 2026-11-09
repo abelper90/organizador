@@ -1,35 +1,37 @@
 # Organizador
 
 App personal de calendario y recordatorios para iPhone. Sin cuentas, sin servidor, sin anuncios.
-Los datos se guardan **solo en tu teléfono**.
+Los datos se guardan **solo en tu teléfono**. Dirección: https://abelper90.github.io/organizador/
 
-## Qué hace ahora
-- Calendario mensual. Pulsas un día y se abre su ficha: añadir, editar, borrar y marcar como hecho.
-- Panel junto al calendario (debajo en móvil vertical): **Hoy** e **Importante · próximos 30 días**.
-- Botón **+** para apuntar algo al vuelo. Abrir la app con `?rapido=1` va directo a ese formulario.
-- Copia de seguridad en un archivo `.json` (Ajustes ⚙︎) y aviso si pasan 14 días sin copia.
+## Pantallas
+Menú ☰ arriba a la izquierda:
+- **Inicio:** calendario de 2 semanas, cuadro **Hoy**, cuadro **Importante** y **Recordatorios** (con casilla para añadir uno al momento).
+- **Calendario:** el mes completo. Pulsas un día para ver, añadir, editar o borrar.
+- **Recordatorios:** pendientes y hechos.
+- **Ajustes y copias:** copias, Calendario del iPhone y preferencias.
 
-## Instalarla en el iPhone (una sola vez)
-Para que iOS la instale hace falta que se sirva por **https** una primera vez. Después funciona sin internet.
-1. Ya está publicada en https://abelper90.github.io/organizador/ (GitHub Pages). Solo contiene el código; nunca tus datos.
-2. Abre la dirección en **Safari** → Compartir → **Añadir a pantalla de inicio**.
-3. Abre la app desde el icono. Quedan guardados el código y los datos en el teléfono; sin Wi-Fi ni datos sigue funcionando.
+El botón **+** abre «Apunte rápido» (recordatorio o evento). Al abrir la app sale directamente ese formulario (se puede quitar en Ajustes).
 
-## Calendario del iPhone (Google / Outlook)
-Una web no puede leer ni escribir directo en el Calendario, así que se pasa en cada sentido por separado.
-- **De la app al Calendario:** abre un evento → «Añadir al Calendario del iPhone» → en el menú de compartir elige Calendario. En Ajustes hay otro botón para pasar todos tus eventos de golpe.
-- **Del Calendario a la app (horario de la uni):** el servidor de la uni no permite que una web lea el calendario por sí sola, así que se hace con el archivo. En el iPhone abre en **Safari** tu enlace personal de calendario de la uni (guárdalo en Notas; no lo compartas ni lo subas a ningún sitio, es privado). Se descarga un archivo `.ics`: guárdalo en Archivos. Luego en la app: Ajustes → «Importar horario (.ics)» → elige ese archivo. Se importan las clases de hace 30 días a 13 meses vista, con hora, aula y profesor. Si lo vuelves a importar se actualiza sin duplicar, y «Borrar eventos importados» limpia solo lo importado.
-- No es automático: hay que repetir la importación si cambia el horario.
+Para añadir una pestaña nueva basta con una entrada más en el menú y una sección en `index.html`.
 
-## Centro de control
-Un atajo del Centro de control no puede abrir esta app instalada (iOS solo abre Safari, que guarda los datos aparte). Por eso no hay atajo: abre la app desde su icono y sale directamente «Apunte rápido».
+## Copias
+- **Automáticas:** una cada día y otra tras cada cambio (las últimas 30 de cada tipo). Están en el propio móvil (Ajustes y copias → Restaurar). Protegen de borrones y errores, no de borrar la app.
+- **En archivo:** Ajustes → «Guardar copia en un archivo». Úsalo de vez en cuando y guarda el `.json` en iCloud Drive.
 
-## Para no perder datos
-- iOS puede borrar los datos de una web que no uses en semanas. Instalada en la pantalla de inicio está protegida, pero haz una copia de vez en cuando (la app te lo recuerda).
-- Guarda el `.json` en iCloud Drive o en Archivos.
-- Para restaurar: Ajustes ⚙︎ → Restaurar desde copia.
+## Calendario del iPhone
+Una web no puede leer ni escribir directo en el Calendario, así que se pasa por archivos.
+- **De la app al Calendario:** abre un evento → «Añadir al Calendario del iPhone». En Ajustes hay un botón para pasar todos tus eventos.
+- **Del Calendario a la app (horario de la uni):** en Ajustes → «Importar horario (.ics)». El archivo sale de tu enlace personal de calendario (privado: no lo subas a ningún sitio). Importa de hace 30 días a 13 meses vista. Si lo repites se actualiza sin duplicar.
+
+## Instalar en el iPhone
+Safari → abrir la dirección → Compartir → **Añadir a pantalla de inicio** (con «Abrir como app web» activado).
+Después funciona sin internet. Las actualizaciones llegan al abrir la app con conexión (Ajustes muestra la versión).
+
+## Límites
+- No hay avisos sonoros: iOS no permite a una web programar notificaciones sin conexión.
+- Un atajo del Centro de control no puede abrir esta app instalada (iOS abre Safari, con datos aparte).
 
 ## Archivos
 - `index.html` — toda la app
-- `sw.js` — la deja disponible sin conexión (si cambias la app, sube el número de `CACHE`)
+- `sw.js` — disponibilidad sin conexión y actualizaciones (sube el número de `CACHE` al cambiar la app)
 - `manifest.json`, `icons/` — instalación e iconos
