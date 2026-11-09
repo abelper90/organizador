@@ -205,6 +205,20 @@ a.btn{display:flex;align-items:center;justify-content:center;text-decoration:non
     <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Asignaturas</h2></div><div id="studySubj"></div></div>
   </section>
 
+  <!-- AVISOS -->
+  <section class="view" id="v-avisos">
+    <div class="card">
+      <div class="btns" style="margin-top:0">
+        <a class="btn" href="https://poliformat.upv.es" target="_blank" rel="noopener">Abrir PoliformaT</a>
+        <button class="btn primary" data-act="avnew">+ Aviso</button>
+      </div>
+      <button class="btn" data-act="avpaste" style="margin-top:10px;width:100%;flex:none">Pegar avisos copiados de PoliformaT</button>
+      <p class="small" style="margin:12px 0 0">Esta app no puede leer tus alertas de PoliformaT por sí sola. Copia el texto de tus alertas allí y pégalo aquí: se crea un aviso por cada bloque.</p>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Sin leer</h2></div><div id="avUnread"></div></div>
+    <div class="card" style="margin-top:16px"><div class="cardhead"><h2>Leídos</h2></div><div id="avRead"></div></div>
+  </section>
+
   <!-- AJUSTES -->
   <section class="view" id="v-set">
     <div class="card" id="setBody"></div>
@@ -221,6 +235,7 @@ a.btn{display:flex;align-items:center;justify-content:center;text-decoration:non
   <button data-go="cal"><span class="ic">▦</span>Calendario</button>
   <button data-go="rem"><span class="ic">☑</span>Recordatorios</button>
   <button data-go="study"><span class="ic">✎</span>Estudios</button>
+  <button data-go="avisos"><span class="ic">!</span>Avisos&nbsp;<span id="avBadge"></span></button>
   <button data-go="set"><span class="ic">⚙</span>Ajustes y copias</button>
   <div class="hint">Aquí iremos añadiendo más pestañas.</div>
 </nav>
@@ -228,11 +243,11 @@ a.btn{display:flex;align-items:center;justify-content:center;text-decoration:non
 <script>
 (function(){
 'use strict';
-var VERSION='8';
+var VERSION='10';
 var KEY='organizador.v1', RKEY='organizador.rem.v1', META='organizador.meta', CFG='organizador.cfg';
 var MONTHS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 var DAYS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-var TITLES={home:'Inicio',cal:'Calendario',rem:'Recordatorios',study:'Estudios',set:'Ajustes y copias'};
+var TITLES={home:'Inicio',cal:'Calendario',rem:'Recordatorios',study:'Estudios',avisos:'Avisos',set:'Ajustes y copias'};
 
 function $(id){return document.getElementById(id)}
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
@@ -259,6 +274,8 @@ var events=read(KEY,[]);
 var reminders=read(RKEY,[]);
 var SKEY='organizador.subj.v1';
 var subjMeta=read(SKEY,{});
+var AKEY='organizador.avisos.v1';
+var notices=read(AKEY,[]);
 var meta=read(META,{lastBackup:null,created:ymd(new Date())});
 var cfg=read(CFG,{quick:true});
 var today=ymd(new Date());
@@ -271,7 +288,7 @@ if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().cat
 
 /* ---------- Guardado + copias automáticas ---------- */
 function save(){
-  var ok=write(KEY,events)&write(RKEY,reminders)&write(SKEY,subjMeta);
+  var ok=write(KEY,events)&write(RKEY,reminders)&write(SKEY,subjMeta)&write(AKEY,notices);
   if(!ok) alert('No se pudo guardar. Haz una copia de seguridad ya.');
   scheduleSnap(); render();
 }
@@ -289,7 +306,7 @@ function idbPut(o){return idb().then(function(db){return new Promise(function(re
   var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).put(o); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
 function idbDel(ts){return idb().then(function(db){return new Promise(function(res,rej){
   var t=db.transaction(STORE,'readwrite'); t.objectStore(STORE).delete(ts); t.oncomplete=res; t.onerror=function(){rej(t.error)}})})}
-function stateStr(){return JSON.stringify({e:events,r:reminders,s:subjMeta})}
+function stateStr(){return JSON.stringify({e:events,r:reminders,s:subjMeta,a:notices})}
 function snap(kind){
   if(!events.length&&!reminders.length) return Promise.resolve();
   var s=stateStr(); if(kind==='change'&&s===lastSnap) return Promise.resolve();
@@ -318,7 +335,7 @@ function restoreSnap(ts){
     var r=all.filter(function(x){return x.ts===ts})[0]; if(!r) return;
     if(!confirm('¿Restaurar esta copia ('+r.ne+' eventos, '+r.nr+' recordatorios)? Se guarda antes una copia de lo actual.')) return;
     snap('pre').then(function(){
-      var d=JSON.parse(r.data); events=d.e||[]; reminders=d.r||[]; if(d.s) subjMeta=d.s; save();
+      var d=JSON.parse(r.data); events=d.e||[]; reminders=d.r||[]; if(d.s) subjMeta=d.s; if(d.a) notices=d.a; save();
     });
   }).catch(function(){});
 }
@@ -457,30 +474,22 @@ function renderStudy(){
   $('studyUp').innerHTML=up.length?up.map(function(e){return itemHtml(e,'e',true)}).join(''):'<div class="empty">Sin exámenes ni entregas próximos. Añádelos con el botón de arriba.</div>';
   $('studySubj').innerHTML=subs.length?subs.map(function(s){
     return '<div class="item" data-subj="'+esc(s.key)+'"><span class="bar"></span><div style="flex:1;min-width:0"><div class="t">'+esc(s.name)+'</div>'+
-      '<div class="m">'+(s.code?esc(s.code)+(s.teachersTxt?' · ':''):'')+esc(s.teachersTxt)+'</div>'+
-      (s.next?'<div class="m">Próxima clase: '+esc(nextTxt(s.next))+'</div>':'')+'</div><span class="chev">›</span></div>';
+      (s.code?'<div class="m">'+esc(s.code)+'</div>':'')+'</div><span class="chev">›</span></div>';
   }).join(''):'<div class="empty">Importa tu horario de la UPV y aparecerán aquí tus asignaturas.</div><button class="link" data-go="set">Ir a Ajustes</button>';
 }
 function subjSheet(key){
   var s=subjects().filter(function(x){return x.key===key})[0]; if(!s) return;
-  var meta=subjMeta[key]||{}, nh=nowHM();
-  var cls=events.filter(function(e){return e.src==='ics'&&(e.code||e.subject)===key&&(e.date>today||(e.date===today&&(e.time||'')>=nh))}).sort(cmp).slice(0,3);
+  var meta=subjMeta[key]||{};
   var tasks=events.filter(function(e){return isTask(e)&&!e.done&&(e.code||e.subject)===key}).sort(cmp);
-  var url=meta.url||'https://poliformat.upv.es';
   openSheet('<h3 style="text-transform:none">'+esc(s.name)+'</h3>'+
-    '<div class="sub">'+(s.code?esc(s.code)+(s.teachersTxt?' · ':''):'')+esc(s.teachersTxt)+'</div>'+
-    '<a class="btn primary" style="flex:none;width:100%" href="'+esc(url)+'" target="_blank" rel="noopener">'+(meta.url?'Abrir en PoliformaT':'Abrir PoliformaT')+'</a>'+
-    '<label for="su">Enlace de esta asignatura en PoliformaT</label><input type="url" id="su" value="'+esc(meta.url||'')+'" placeholder="Pega aquí el enlace (https://…)">'+
-    '<label for="sn">Notas de la asignatura</label><textarea id="sn">'+esc(meta.notes||'')+'</textarea>'+
-    '<h2 style="margin:18px 0 4px">Exámenes y entregas</h2>'+(tasks.length?tasks.map(function(e){return itemHtml(e,'e',true)}).join(''):'<div class="empty">Ninguno apuntado.</div>')+
+    '<div class="sub">'+(s.code?esc(s.code):'')+'</div>'+
+    '<h2 style="margin:12px 0 4px">Exámenes y entregas</h2>'+(tasks.length?tasks.map(function(e){return itemHtml(e,'e',true)}).join(''):'<div class="empty">Ninguno apuntado.</div>')+
     '<div class="btns" style="margin-top:10px"><button class="btn" data-act="study" data-kind="entrega" data-key="'+esc(key)+'">+ Entrega</button><button class="btn" data-act="study" data-kind="examen" data-key="'+esc(key)+'">+ Examen</button></div>'+
-    '<h2 style="margin:18px 0 4px">Próximas clases</h2>'+(cls.length?cls.map(function(e){return '<div class="m" style="padding:3px 0">'+esc(nextTxt(e))+'</div>'}).join(''):'<div class="empty">No hay más clases en el horario importado.</div>')+
+    '<label for="sn">Notas de la asignatura</label><textarea id="sn">'+esc(meta.notes||'')+'</textarea>'+
     '<div class="btns"><button class="btn" data-act="close">Cerrar</button><button class="btn primary" data-act="subjsave" data-key="'+esc(key)+'">Guardar</button></div>');
 }
 function saveSubj(key){
-  var u=$('su').value.trim();
-  if(u&&!/^https?:\/\//i.test(u)){alert('El enlace tiene que empezar por https://');return}
-  subjMeta[key]={url:u,notes:$('sn').value.trim()}; save(); closeSheet();
+  subjMeta[key]={notes:$('sn').value.trim()}; save(); closeSheet();
 }
 function studyPick(){
   var subs=subjects();
@@ -493,6 +502,68 @@ function newStudy(kind,key){
   form('e',null,{extra:{kind:kind,subject:s?s.name:'',code:s?s.code:''},preset:{title:(kind==='examen'?'Examen':'Entrega')+(s?' '+s.name:''),important:true}});
 }
 
+/* ---------- Avisos ---------- */
+var AV_TYPES={hora:'Cambio de horario',examen:'Convocatoria de examen',otro:'Otro aviso'};
+function avItem(n){
+  return '<div class="item'+(n.type==='examen'?' imp':'')+(n.type==='otro'?' rem':'')+(n.read?' done':'')+'" data-av="'+n.id+'"><span class="bar"></span><div style="flex:1;min-width:0"><div class="t">'+esc(n.title)+'</div>'+
+    '<div class="m d">'+esc(AV_TYPES[n.type]||'Aviso')+(n.subject?' · '+esc(n.subject):'')+' · '+short(n.date)+'</div>'+(n.text?'<div class="m">'+esc(n.text.slice(0,90))+'</div>':'')+'</div>'+
+    '<button class="chk'+(n.read?' on':'')+'" data-avchk="'+n.id+'" aria-label="Marcar leído">'+(n.read?'✓':'')+'</button></div>';
+}
+function renderAvisos(){
+  var byNew=function(a,b){return (b.created||0)-(a.created||0)};
+  var un=notices.filter(function(n){return !n.read}).sort(byNew), rd=notices.filter(function(n){return n.read}).sort(byNew).slice(0,30);
+  $('avUnread').innerHTML=un.length?un.map(avItem).join(''):'<div class="empty">No tienes avisos sin leer.</div>';
+  $('avRead').innerHTML=rd.length?rd.map(avItem).join(''):'<div class="empty">Nada leído todavía.</div>';
+}
+function avForm(n){
+  var isNew=!n; n=n||{title:'',type:'otro',subject:'',text:''};
+  var subs=subjects();
+  var opts='<option value="">General</option>'+subs.map(function(s){return '<option value="'+esc(s.name)+'"'+(s.name===n.subject?' selected':'')+'>'+esc(s.name)+'</option>'}).join('');
+  if(n.subject&&!subs.some(function(s){return s.name===n.subject})) opts+='<option value="'+esc(n.subject)+'" selected>'+esc(n.subject)+'</option>';
+  openSheet('<h3>'+(isNew?'Nuevo aviso':'Aviso')+'</h3>'+
+    '<form id="af" autocomplete="off"><label for="at">Título</label><input type="text" id="at" value="'+esc(n.title)+'" placeholder="p. ej. Cambio de aula en Máquinas Eléctricas" required>'+
+    '<div class="row"><div><label for="atype">Tipo</label><select id="atype">'+Object.keys(AV_TYPES).map(function(k){return '<option value="'+k+'"'+(k===n.type?' selected':'')+'>'+AV_TYPES[k]+'</option>'}).join('')+'</select></div>'+
+    '<div><label for="as">Asignatura</label><select id="as">'+opts+'</select></div></div>'+
+    '<label for="ax">Texto (puedes pegar el aviso)</label><textarea id="ax" style="min-height:110px">'+esc(n.text||'')+'</textarea>'+
+    ((!isNew&&n.type!=='otro')?'<button type="button" class="btn" data-act="avevent" data-id="'+n.id+'" style="margin-top:16px;width:100%;flex:none">Crear evento con este aviso</button>':'')+
+    '<div class="btns">'+(isNew?'':'<button type="button" class="btn danger" data-act="avdel" data-id="'+n.id+'">Borrar</button>')+
+    '<button type="button" class="btn" data-act="close">Cancelar</button><button type="submit" class="btn primary">Guardar</button></div></form>');
+  $('af').onsubmit=function(ev){
+    ev.preventDefault(); var t=$('at').value.trim(); if(!t) return;
+    var vals={title:t,type:$('atype').value,subject:$('as').value,text:$('ax').value.trim()};
+    if(isNew) notices.push(Object.assign({id:uid(),date:today,created:Date.now(),read:false},vals));
+    else for(var i=0;i<notices.length;i++) if(notices[i].id===n.id) notices[i]=Object.assign({},notices[i],vals);
+    save(); closeSheet();
+  };
+  if(isNew) setTimeout(function(){$('at').focus()},250);
+}
+function avPaste(){
+  openSheet('<h3>Pegar avisos</h3><div class="sub">Pega el texto de tus alertas de PoliformaT. Separa cada aviso con una línea en blanco: la primera línea es el título.</div>'+
+    '<textarea id="apx" style="min-height:200px" placeholder="Pega aquí…"></textarea>'+
+    '<div class="btns"><button class="btn" data-act="close">Cancelar</button><button class="btn primary" data-act="avpasteok">Importar</button></div>');
+  setTimeout(function(){$('apx').focus()},250);
+}
+function avPasteImport(){
+  var raw=($('apx').value||'').replace(/\r/g,'').trim(); if(!raw) return;
+  var blocks=raw.split(/\n\s*\n/).map(function(b){return b.trim()}).filter(Boolean);
+  var subs=subjects(), seen={}, added=0, norm=function(s){return s.toLowerCase().replace(/\s+/g,' ')};
+  notices.forEach(function(n){seen[norm(n.title+'|'+(n.text||''))]=1});
+  blocks.forEach(function(b){
+    var lines=b.split('\n').map(function(l){return l.trim()}).filter(Boolean);
+    var title=lines[0].slice(0,120), text=lines.slice(1).join('\n'), key=norm(title+'|'+text);
+    if(seen[key]) return; seen[key]=1;
+    var low=b.toLowerCase();
+    var type=/(examen|convocatoria|evaluaci|parcial|recuperaci)/.test(low)?'examen':/(horario|aula|cambio|clase|aplaza|suspend)/.test(low)?'hora':'otro';
+    var hit=subs.filter(function(s){return low.indexOf(s.name.toLowerCase())>=0})[0];
+    notices.push({id:uid(),title:title,type:type,subject:hit?hit.name:'',text:text,date:today,created:Date.now()+added,read:false}); added++;
+  });
+  save(); closeSheet(); alert(added?'Añadidos '+added+' avisos.':'No había avisos nuevos (o ya estaban).');
+}
+function avEvent(n){
+  var s=n.subject?subjects().filter(function(x){return x.name===n.subject})[0]:null;
+  form('e',null,{extra:n.type==='examen'?{kind:'examen',subject:n.subject,code:s?s.code:''}:{},preset:{title:n.title,notes:n.text,important:n.type==='examen'}});
+}
+
 function renderBanner(){
   var b=$('banner'); if(current!=='home'||(!events.length&&!reminders.length)){b.classList.remove('show');return}
   var days=meta.lastBackup?Math.floor((parse(today)-parse(meta.lastBackup))/864e5):999;
@@ -501,7 +572,8 @@ function renderBanner(){
 }
 
 function render(){
-  if(current==='home') renderHome(); else if(current==='cal') renderCal(); else if(current==='rem') renderRem(); else if(current==='study') renderStudy(); else renderSet();
+  if(current==='home') renderHome(); else if(current==='cal') renderCal(); else if(current==='rem') renderRem(); else if(current==='study') renderStudy(); else if(current==='avisos') renderAvisos(); else renderSet();
+  var unr=notices.filter(function(n){return !n.read}).length; $('avBadge').textContent=unr?'('+unr+')':'';
   renderBanner();
 }
 
@@ -510,7 +582,7 @@ function openMenu(){ $('drawer').classList.add('open'); $('scrim').classList.add
 function closeMenu(){ $('drawer').classList.remove('open'); $('scrim').classList.remove('open') }
 function go(v){
   current=v; closeMenu(); closeSheet();
-  ['home','cal','rem','study','set'].forEach(function(n){
+  ['home','cal','rem','study','avisos','set'].forEach(function(n){
     $('v-'+n).classList.toggle('on',n===v);
     var b=document.querySelector('#drawer [data-go='+n+']'); if(b) b.classList.toggle('on',n===v);
   });
@@ -575,7 +647,7 @@ function quickForm(){ form('r',null,{quick:true}) }
 
 /* ---------- Copia en archivo ---------- */
 function exportData(){
-  var blob=new Blob([JSON.stringify({app:'organizador',version:2,exported:new Date().toISOString(),events:events,reminders:reminders,subjects:subjMeta},null,2)],{type:'application/json'});
+  var blob=new Blob([JSON.stringify({app:'organizador',version:2,exported:new Date().toISOString(),events:events,reminders:reminders,subjects:subjMeta,avisos:notices},null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='organizador-copia-'+today+'.json';
   document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
   meta.lastBackup=today; write(META,meta); render();
@@ -588,6 +660,8 @@ function importData(file){
       var ids={}, rids={}; events.forEach(function(e){ids[e.id]=1}); reminders.forEach(function(e){rids[e.id]=1});
       var added=0;
       j.events.forEach(function(e){ if(e&&e.id&&e.title&&e.date&&!ids[e.id]){events.push({id:String(e.id),title:String(e.title),date:String(e.date),time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,src:e.src,subject:e.subject,code:e.code,teacher:e.teacher,kind:e.kind});added++} });
+      var nids={}; notices.forEach(function(x){nids[x.id]=1});
+      (j.avisos||[]).forEach(function(x){ if(x&&x.id&&x.title&&!nids[x.id]){notices.push(x);added++} });
       if(j.subjects) Object.keys(j.subjects).forEach(function(k){ if(!subjMeta[k]) subjMeta[k]=j.subjects[k] });
       (j.reminders||[]).forEach(function(e){ if(e&&e.id&&e.title&&!rids[e.id]){reminders.push({id:String(e.id),title:String(e.title),date:e.date||'',time:e.time||'',important:!!e.important,notes:e.notes||'',done:!!e.done,created:e.created||Date.now(),doneAt:e.doneAt});added++} });
       save(); alert('Importados '+added+' elementos nuevos.');
@@ -722,6 +796,9 @@ document.addEventListener('click',function(ev){
     var day=openDay; save(); if(day&&$('sheet').classList.contains('open')) dayView(day);
     return;
   }
+  var avc=t.closest('[data-avchk]');
+  if(avc){ ev.stopPropagation(); var an=find(notices,avc.getAttribute('data-avchk')); if(an) an.read=!an.read; save(); return }
+  var avi=t.closest('[data-av]'); if(avi && !t.closest('[data-act]')){ var an2=find(notices,avi.getAttribute('data-av')); if(an2) avForm(an2); return }
   var go1=t.closest('[data-go]'); if(go1){go(go1.getAttribute('data-go'));return}
   var act=t.closest('[data-act]');
   if(act){
@@ -733,6 +810,11 @@ document.addEventListener('click',function(ev){
     else if(a==='icsall') sendICS(events.filter(function(x){return x.src!=='ics'}),'organizador.ics');
     else if(a==='icsimport') $('icsfile').click();
     else if(a==='icsdel'){ var n=events.filter(function(x){return x.src==='ics'}).length; if(n&&confirm('¿Borrar los '+n+' eventos importados? No toca los que creaste tú.')){events=events.filter(function(x){return x.src!=='ics'});save()} else if(!n) alert('No hay eventos importados.') }
+    else if(a==='avnew') avForm(null);
+    else if(a==='avpaste') avPaste();
+    else if(a==='avpasteok') avPasteImport();
+    else if(a==='avdel'){ if(confirm('¿Borrar este aviso?')){var ai=act.getAttribute('data-id'); notices=notices.filter(function(x){return x.id!==ai}); save(); closeSheet()} }
+    else if(a==='avevent'){ var an3=find(notices,act.getAttribute('data-id')); if(an3) avEvent(an3) }
     else if(a==='studypick') studyPick();
     else if(a==='study'){ var sel=$('sp'); newStudy(act.getAttribute('data-kind'),act.getAttribute('data-key')||(sel?sel.value:'')) }
     else if(a==='subjsave') saveSubj(act.getAttribute('data-key'));
