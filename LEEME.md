@@ -15,11 +15,14 @@ Para que iOS la instale hace falta que se sirva por **https** una primera vez. D
 2. Abre la dirección en **Safari** → Compartir → **Añadir a pantalla de inicio**.
 3. Abre la app desde el icono. Quedan guardados el código y los datos en el teléfono; sin Wi-Fi ni datos sigue funcionando.
 
-## Botón en el Centro de control (iOS 18 o superior)
-1. App **Atajos** → nuevo atajo → acción **Abrir URL** con `https://abelper90.github.io/organizador/?rapido=1`.
-   (O mejor aún: acción **Añadir nuevo recordatorio** de Recordatorios si quieres que salga en la app de Apple.)
-2. Ajustes → Centro de control → **Añadir un control** → Atajos → elige ese atajo.
-3. Desliza hacia abajo desde arriba a la derecha y pulsa el control: se abre el formulario rápido.
+## Calendario del iPhone (Google / Outlook)
+Una web no puede leer ni escribir directo en el Calendario, así que se pasa en cada sentido por separado.
+- **De la app al Calendario:** abre un evento → «Añadir al Calendario del iPhone» → en el menú de compartir elige Calendario. En Ajustes hay otro botón para pasar todos tus eventos de golpe.
+- **Del Calendario a la app (horario de la uni):** exporta el calendario como `.ics` desde Google Calendar (Ajustes → Importar y exportar → Exportar) u Outlook (Calendario → Compartir → publicar `.ics`), guárdalo en Archivos y en Ajustes pulsa «Importar horario (.ics)». Se importan las clases repetidas semanalmente (13 meses vista). Si lo vuelves a importar se actualiza sin duplicar, y «Borrar eventos importados» limpia solo lo importado.
+- No es automático: hay que repetir la importación si cambia el horario.
+
+## Centro de control
+Un atajo del Centro de control no puede abrir esta app instalada (iOS solo abre Safari, que guarda los datos aparte). Por eso no hay atajo: abre la app desde su icono y sale directamente «Apunte rápido».
 
 ## Para no perder datos
 - iOS puede borrar los datos de una web que no uses en semanas. Instalada en la pantalla de inicio está protegida, pero haz una copia de vez en cuando (la app te lo recuerda).

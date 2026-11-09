@@ -210,6 +210,7 @@ function form(e,dateDefault,quick){
     '<div><label for="fh">Hora (opcional)</label><input type="time" id="fh" value="'+(e.time||'')+'"></div></div>'+
     '<label class="toggle"><input type="checkbox" id="fi"'+(e.important?' checked':'')+'> Importante</label>'+
     '<label for="fn">Notas</label><textarea id="fn">'+esc(e.notes||'')+'</textarea>'+
+    (isNew?'':'<button type="button" class="btn" data-act="ical" data-id="'+e.id+'" style="margin-top:16px;width:100%;flex:none">Añadir al Calendario del iPhone</button>')+
     '<div class="btns">'+(isNew?'':'<button type="button" class="btn danger" data-act="del" data-id="'+e.id+'">Borrar</button>')+
     '<button type="button" class="btn" data-act="close">Cancelar</button><button type="submit" class="btn primary">Guardar</button></div></form>');
   $('f').onsubmit=function(ev){
@@ -246,11 +247,17 @@ function menu(){
   openSheet('<h3>Ajustes</h3><div class="sub">Tus datos viven solo en este dispositivo. No hay cuentas ni servidores.</div>'+
     '<div class="menu"><button class="btn primary" data-act="export">Guardar copia de seguridad</button>'+
     '<button class="btn" data-act="import">Restaurar desde copia</button>'+
+    '<div class="small" style="margin:14px 0 8px">Calendario del iPhone</div>'+
+    '<button class="btn" data-act="icsall">Añadir mis eventos al Calendario</button>'+
+    '<button class="btn" data-act="icsimport">Importar horario (.ics)</button>'+
+    '<button class="btn danger" data-act="icsdel">Borrar eventos importados</button>'+
+    '<input type="file" id="icsfile" accept=".ics,text/calendar" hidden>'+
     '<input type="file" id="file" accept="application/json,.json" hidden>'+
     '<label class="toggle" style="margin:6px 0 14px"><input type="checkbox" id="cfgQuick"'+(cfg.quick?' checked':'')+'> Al abrir la app, mostrar directamente «Apunte rápido»</label>'+
     '<div class="small">'+events.length+' eventos guardados. Última copia: '+(meta.lastBackup||'nunca')+'.</div></div>'+
     '<div class="btns"><button class="btn" data-act="close">Cerrar</button></div>');
   $('file').onchange=function(){ if(this.files[0]) importData(this.files[0]) };
+  $('icsfile').onchange=function(){ if(this.files[0]) importICS(this.files[0]) };
   $('cfgQuick').onchange=function(){ cfg.quick=this.checked; write(CFG,cfg); };
 }
 function renderBanner(){
@@ -258,6 +265,113 @@ function renderBanner(){
   var days=meta.lastBackup?Math.floor((parse(today)-parse(meta.lastBackup))/864e5):999;
   if(days>=14){ $('bannerTxt').textContent=meta.lastBackup?'Hace '+days+' días de tu última copia.':'Aún no has guardado ninguna copia de seguridad.'; b.classList.add('show') }
   else b.classList.remove('show');
+}
+
+/* ---------- Calendario del iPhone (.ics) ---------- */
+function icsEsc(s){return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n')}
+function icsDate(s){return s.replace(/-/g,'')}
+function buildICS(list){
+  var L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Organizador//ES','CALSCALE:GREGORIAN'];
+  var stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  list.forEach(function(e){
+    L.push('BEGIN:VEVENT','UID:'+e.id+'@organizador','DTSTAMP:'+stamp,'SUMMARY:'+icsEsc(e.title));
+    if(e.time){
+      var p=e.time.split(':'), d=parse(e.date); d.setHours(+p[0]+1,+p[1]);
+      L.push('DTSTART:'+icsDate(e.date)+'T'+p[0]+p[1]+'00','DTEND:'+icsDate(ymd(d))+'T'+pad(d.getHours())+pad(d.getMinutes())+'00');
+      L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+icsEsc(e.title),'TRIGGER:-PT15M','END:VALARM');
+    }else{
+      var n=parse(e.date); n.setDate(n.getDate()+1);
+      L.push('DTSTART;VALUE=DATE:'+icsDate(e.date),'DTEND;VALUE=DATE:'+icsDate(ymd(n)));
+    }
+    if(e.notes) L.push('DESCRIPTION:'+icsEsc(e.notes));
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  return L.join('\r\n');
+}
+function sendICS(list,name){
+  if(!list.length){alert('No hay eventos para añadir.');return}
+  var text=buildICS(list), file=null;
+  try{file=new File([text],name,{type:'text/calendar'})}catch(x){}
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:'Organizador'}).catch(function(){}); return; }
+  var a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'text/calendar'})); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+function icsUnesc(s){return s.replace(/\\n/gi,'\n').replace(/\\([,;\\])/g,'$1')}
+function parseDT(v){
+  var m=String(v).match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})?(Z)?)?$/); if(!m) return null;
+  var d;
+  if(m[4]==null) d=new Date(+m[1],+m[2]-1,+m[3]);
+  else if(m[7]) d=new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0)));
+  else d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0));
+  return {date:ymd(d),time:m[4]==null?'':pad(d.getHours())+':'+pad(d.getMinutes())};
+}
+function parseICS(text){
+  var lines=text.replace(/\r\n?/g,'\n').replace(/\n[ \t]/g,'').split('\n'), evs=[], cur=null, alarm=false;
+  lines.forEach(function(ln){
+    if(ln==='BEGIN:VEVENT'){cur={ex:[]};alarm=false;return}
+    if(ln==='END:VEVENT'){if(cur)evs.push(cur);cur=null;return}
+    if(!cur) return;
+    if(ln==='BEGIN:VALARM'){alarm=true;return}
+    if(ln==='END:VALARM'){alarm=false;return}
+    if(alarm) return;
+    var i=ln.indexOf(':'); if(i<0) return;
+    var name=ln.slice(0,i).split(';')[0].toUpperCase(), val=ln.slice(i+1);
+    if(name==='SUMMARY')cur.title=icsUnesc(val);
+    else if(name==='DESCRIPTION')cur.desc=icsUnesc(val);
+    else if(name==='LOCATION')cur.loc=icsUnesc(val);
+    else if(name==='UID')cur.uid=val;
+    else if(name==='STATUS')cur.status=val;
+    else if(name==='RRULE')cur.rrule=val;
+    else if(name==='RECURRENCE-ID')cur.recid=parseDT(val);
+    else if(name==='DTSTART')cur.start=parseDT(val);
+    else if(name==='EXDATE')val.split(',').forEach(function(x){var p=parseDT(x);if(p)cur.ex.push(p.date)});
+  });
+  return evs;
+}
+function expand(ev,from,to){
+  if(!ev.rrule) return (ev.start.date>=from&&ev.start.date<=to)?[ev.start]:[];
+  var r={}; ev.rrule.split(';').forEach(function(p){var kv=p.split('=');r[kv[0]]=kv[1]});
+  var freq=r.FREQ, iv=+(r.INTERVAL||1), count=r.COUNT?+r.COUNT:Infinity;
+  var until=r.UNTIL?parseDT(r.UNTIL):null, untilS=until?until.date:'9999-12-31';
+  var map={SU:0,MO:1,TU:2,WE:3,TH:4,FR:5,SA:6};
+  var s0=parse(ev.start.date), end=parse(to), out=[], n=0;
+  var byday=r.BYDAY?r.BYDAY.split(',').map(function(x){return map[x.slice(-2)]}):[s0.getDay()];
+  var mon0=new Date(s0); mon0.setDate(s0.getDate()-((s0.getDay()+6)%7));
+  for(var d=new Date(s0); d<=end && n<count; d.setDate(d.getDate()+1)){
+    var ds=ymd(d); if(ds>untilS) break;
+    var ok=false;
+    if(freq==='DAILY') ok=Math.round((d-s0)/864e5)%iv===0;
+    else if(freq==='WEEKLY'){var mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));ok=Math.round((mon-mon0)/6048e5)%iv===0&&byday.indexOf(d.getDay())>=0}
+    else if(freq==='MONTHLY') ok=d.getDate()===s0.getDate()&&((d.getFullYear()-s0.getFullYear())*12+d.getMonth()-s0.getMonth())%iv===0;
+    else if(freq==='YEARLY') ok=d.getDate()===s0.getDate()&&d.getMonth()===s0.getMonth()&&(d.getFullYear()-s0.getFullYear())%iv===0;
+    if(ok){n++; if(ds>=from&&ev.ex.indexOf(ds)<0) out.push({date:ds,time:ev.start.time})}
+  }
+  return out;
+}
+function importICS(file){
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var evs=parseICS(String(r.result)); if(!evs.length) throw 0;
+      var from=ymd(new Date(Date.now()-30*864e5)), t=new Date(); t.setDate(t.getDate()+400); var to=ymd(t);
+      var over={}; evs.forEach(function(e){if(e.recid) over[(e.uid||e.title)+'|'+e.recid.date]=1});
+      var added=0, updated=0;
+      evs.forEach(function(e){
+        if(e.status==='CANCELLED'||!e.start||!e.title) return;
+        var key=e.uid||e.title;
+        expand(e,from,to).forEach(function(o){
+          if(!e.recid&&over[key+'|'+o.date]) return;
+          var id='ics-'+key+'-'+o.date, notes=[e.loc,e.desc].filter(Boolean).join(' · ').slice(0,300);
+          var ex=events.filter(function(x){return x.id===id})[0];
+          if(ex){ex.title=e.title;ex.time=o.time;ex.notes=notes;updated++}
+          else{events.push({id:id,title:e.title,date:o.date,time:o.time,important:false,notes:notes,done:false,src:'ics'});added++}
+        });
+      });
+      save(); closeSheet(); alert('Importados '+added+' eventos nuevos y '+updated+' actualizados (de hace 30 días a 13 meses vista).');
+    }catch(x){alert('No he podido leer ese archivo. Tiene que ser un calendario .ics.')}
+  };
+  r.readAsText(file);
 }
 
 /* ---------- Eventos de interfaz ---------- */
@@ -271,6 +385,10 @@ document.addEventListener('click',function(ev){
     if(a==='close') closeSheet();
     else if(a==='new') form(null,act.getAttribute('data-d'));
     else if(a==='del'){ if(confirm('¿Borrar este evento?')){events=events.filter(function(e){return e.id!==act.getAttribute('data-id')});save();closeSheet()} }
+    else if(a==='ical'){var one=events.filter(function(x){return x.id===act.getAttribute('data-id')})[0]; if(one) sendICS([one],'evento.ics')}
+    else if(a==='icsall') sendICS(events.filter(function(x){return x.src!=='ics'}),'organizador.ics');
+    else if(a==='icsimport') $('icsfile').click();
+    else if(a==='icsdel'){ var k=events.filter(function(x){return x.src==='ics'}).length; if(k&&confirm('¿Borrar los '+k+' eventos importados? No toca los que creaste tú.')){events=events.filter(function(x){return x.src!=='ics'});save();closeSheet()} else if(!k) alert('No hay eventos importados.') }
     else if(a==='export') exportData();
     else if(a==='import') $('file').click();
     return}
